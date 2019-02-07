@@ -1,12 +1,12 @@
-##QUES-PostgreSQL=group
-##proj.file=string
-##landuse_1=string
-##landuse_2=string
-##planning_unit=string
-##lookup_lc=string
+## define initial file
+working_directory="D:/GGP/Jambi/Result/"
+landuse_1="D:/GGP/NPV/lc_jb_v4_nodata/lc1990_v4_nodata.tif"
+landuse_2="D:/GGP/NPV/lc_jb_v4_nodata/lc2000_v4_nodata.tif"
+planning_unit="D:/GGP/Jambi/pola_ruang_jambi_48s.tif.tif"
+lookup_lc="data_jambi/table/Land_cover_legend_jambi.csv"
+lookup_z="D:/GGP/Jambi/pola_ruang_jambi_48s.csv"
 ##Analysis_option=selection All analysis; Perubahan dominan di tiap zona; Dinamika perubahan di tiap zona (Alpha-Beta); Analisis alur perubahan (Trajectory)
-##raster.nodata=number 0
-##statusoutput=output table
+
 
 #=Load library
 library(rtf)
@@ -26,85 +26,39 @@ library(DBI)
 library(RPostgreSQL)
 library(rpostgis)
 library(magick)
+library(officer)
 
 analysis.option<-Analysis_option
-
 time_start<-paste(eval(parse(text=(paste("Sys.time ()")))), sep="")
 
-#=Load active project
-load(proj.file)
+## Set initial variables in R environment
+Analysis_option=1
+raster.nodata=0
+# initial time period
+T1<-1990
+T2<-2000
 
-# set driver connection
-driver <- dbDriver('PostgreSQL')
-project <- as.character(proj_descr[1,2])
-DB <- dbConnect(
-  driver, dbname=project, host=as.character(pgconf$host), port=as.character(pgconf$port),
-  user=as.character(pgconf$user), password=as.character(pgconf$pass)
-)
-
-#=Retrieve all list of data that are going to be used
-# list_of_data_luc ==> list of data land use/cover 
-# list_of_data_pu ==> list of data planning unit
-# list_of_data_f ==> list of data factor
-# list_of_data_lut ==> list of data lookup table
-list_of_data_luc<-dbReadTable(DB, c("public", "list_of_data_luc"))
-list_of_data_pu<-dbReadTable(DB, c("public", "list_of_data_pu"))
-list_of_data_lut<-dbReadTable(DB, c("public", "list_of_data_lut"))
-# return the selected data from the list
-data_luc1<-list_of_data_luc[which(list_of_data_luc$RST_NAME==landuse_1),]
-data_luc2<-list_of_data_luc[which(list_of_data_luc$RST_NAME==landuse_2),]
-data_pu<-list_of_data_pu[which(list_of_data_pu$RST_NAME==planning_unit),]
-data_lut<-list_of_data_lut[which(list_of_data_lut$TBL_NAME==lookup_lc),]
-
-#=Set initial variables
-# time period
-T1<-data_luc1$PERIOD
-T2<-data_luc2$PERIOD
-
-#=Set working directory
-pu_name<-data_pu$RST_NAME
-idx_PreQUES<-idx_PreQUES+1
-preques_folder<-paste(idx_PreQUES, "_PreQUES_",T1,"_",T2,"_",pu_name,sep="")
-result_dir<-paste(dirname(proj.file),"/QUES/PreQUES/", preques_folder, sep="")
+# Set working directory
+pu_name<-"pola_ruang"
+idx_PreQUES<-1
+result_dir<-paste(idx_PreQUES, "_PreQUES_",T1,"_",T2,"_",pu_name,sep="")
 dir.create(result_dir)
 
-# create temp directory
-dir.create(LUMENS_path_user, mode="0777")
-setwd(LUMENS_path_user)
-
-#=Set initial variables
-# reference map
-ref.obj<-exists('ref')
-ref.path<-paste(dirname(proj.file), '/ref.tif', sep='')
-if(!ref.obj){
-  if(file.exists(ref.path)){
-    ref<-raster(ref.path)
-  } else {
-    ref<-getRasterFromPG(pgconf, project, 'ref_map', 'ref.tif')
-  }
-}
+## load tabular data
 # planning unit
-if (data_pu$RST_DATA=="ref") {
-  zone<-ref
-  count_ref<-as.data.frame(freq(ref))
-  count_ref<-na.omit(count_ref)
-  colnames(count_ref)<-c("IDADM", "COUNT")
-  ref_table<-dbReadTable(DB, c("public", data_pu$LUT_NAME)) 
-  lookup_z<-merge(count_ref, ref_table, by="IDADM")
-} else {
-  zone<-getRasterFromPG(pgconf, project, data_pu$RST_DATA, paste(data_pu$RST_DATA, '.tif', sep=''))
-  lookup_z<-dbReadTable(DB, c("public", data_pu$LUT_NAME)) 
-}
+lookup_z<-read.table(lookup_z, header = T, sep = ",")
+# land cover
+lookup_lc<-read.table(lookup_lc, header = T, sep = ",")
+
 # landuse first time period
-landuse1<-getRasterFromPG(pgconf, project, data_luc1$RST_DATA, paste(data_luc1$RST_DATA, '.tif', sep=''))
+landuse1<-raster(landuse_1)
 # landuse second time period
-landuse2<-getRasterFromPG(pgconf, project, data_luc2$RST_DATA, paste(data_luc2$RST_DATA, '.tif', sep=''))
+landuse2<-raster(landuse_2)
+# zone
+zone <- raster(planning_unit)
 # landcover lookup table
-lut.lc<-dbReadTable(DB, c("public", data_lut$TBL_DATA)) 
-lut.lc<-lut.lc[,1:2]
-lookup_lc2<-lut.lc
-lookup_l<-lut.lc
-lookup_lc<-lut.lc
+lookup_l<-lookup_lc
+lookup_lc<-lookup_lc
 colnames(lookup_l)<-c("ID", "CLASS")
 colnames(lookup_lc)<-c("ID", "CLASS")
 
@@ -112,83 +66,76 @@ nLandCoverId<-nrow(lookup_lc)
 nPlanningUnitId<-nrow(lookup_z)
 
 #=Projection handling
-if (grepl("+units=m", as.character(ref@crs))){
-  print("Raster maps have projection in meter unit")
-  Spat_res<-res(ref)[1]*res(ref)[2]/10000
-  paste("Raster maps have ", Spat_res, " Ha spatial resolution, QuES-C will automatically generate data in Ha unit")
-} else if (grepl("+proj=longlat", as.character(ref@crs))){
-  print("Raster maps have projection in degree unit")
-  Spat_res<-res(ref)[1]*res(ref)[2]*(111319.9^2)/10000
-  paste("Raster maps have ", Spat_res, " Ha spatial resolution, QuES-C will automatically generate data in Ha unit")
-} else{
-  statuscode<-0
-  statusmessage<-"Raster map projection is unknown"
-  statusoutput<-data.frame(statuscode=statuscode, statusmessage=statusmessage)
-  quit()
-}
+Spat_res=1
+# if (grepl("+units=m", as.character(ref@crs))){
+#   print("Raster maps have projection in meter unit")
+#   Spat_res<-res(ref)[1]*res(ref)[2]/10000
+#   paste("Raster maps have ", Spat_res, " Ha spatial resolution, QuES-C will automatically generate data in Ha unit")
+# } else if (grepl("+proj=longlat", as.character(ref@crs))){
+#   print("Raster maps have projection in degree unit")
+#   Spat_res<-res(ref)[1]*res(ref)[2]*(111319.9^2)/10000
+#   paste("Raster maps have ", Spat_res, " Ha spatial resolution, QuES-C will automatically generate data in Ha unit")
+# } else{
+#   statuscode<-0
+#   statusmessage<-"Raster map projection is unknown"
+#   statusoutput<-data.frame(statuscode=statuscode, statusmessage=statusmessage)
+#   quit()
+# }
 
 #=Create land use change data dummy
-xtab<-tolower(paste('xtab_', pu_name, T1, T2, sep=''))
-data_xtab<-list_of_data_lut[which(list_of_data_lut$TBL_NAME==xtab),]
-if(nrow(data_xtab)==0){
-  dummy1<-data.frame(nPU=lookup_z$ID, divider=nLandCoverId*nLandCoverId)
-  dummy1<-expandRows(dummy1, 'divider')
-  
-  dummy2<-data.frame(nT1=lookup_lc$ID, divider=nLandCoverId)
-  dummy2<-expandRows(dummy2, 'divider')
-  dummy2<-data.frame(nT1=rep(dummy2$nT1, nPlanningUnitId))
-  
-  dummy3<-data.frame(nT2=rep(rep(lookup_lc$ID, nLandCoverId), nPlanningUnitId))
-  
-  landUseChangeMapDummy<-cbind(dummy1, dummy2, dummy3)
-  colnames(landUseChangeMapDummy)<-c('ZONE', 'ID_LC1', 'ID_LC2')
-  
-  #=Create cross-tabulation
-  R<-(zone*1) + (landuse1*100^1) + (landuse2*100^2)
-  lu.db<-as.data.frame(freq(R))
-  lu.db<-na.omit(lu.db)
-  n<-3
-  k<-0
-  lu.db$value_temp<-lu.db$value
-  while(k < n) {
-    eval(parse(text=(paste("lu.db$Var", n-k, "<-lu.db$value_temp %% 100", sep=""))))  
-    lu.db$value_temp<-floor(lu.db$value_temp/100)
-    k=k+1
-  }
-  lu.db$value_temp<-NULL
-  #lu.db$value<-NULL
-  colnames(lu.db)=c('ID_CHG', 'COUNT', 'ZONE', 'ID_LC1', 'ID_LC2')
-  lu.db<-merge(landUseChangeMapDummy, lu.db, by=c('ZONE', 'ID_LC1', 'ID_LC2'), all=TRUE)
-  lu.db$ID_CHG<-lu.db$ZONE*1 + lu.db$ID_LC1*100^1 + lu.db$ID_LC2*100^2
-  lu.db<-replace(lu.db, is.na(lu.db), 0)
-  
-  idx_lut<-idx_lut+1
-  eval(parse(text=(paste("in_lut", idx_lut, " <- lu.db", sep=""))))
-  
-  eval(parse(text=(paste("list_of_data_lut<-data.frame(TBL_DATA='in_lut", idx_lut,"', TBL_NAME='", xtab, "', row.names=NULL)", sep=""))))
-  # save to PostgreSQL
-  InLUT_i <- paste('in_lut', idx_lut, sep="")
-  dbWriteTable(DB, InLUT_i, eval(parse(text=(paste(InLUT_i, sep="" )))), append=TRUE, row.names=FALSE)
-  dbWriteTable(DB, "list_of_data_lut", list_of_data_lut, append=TRUE, row.names=FALSE)
-  
-  setwd(result_dir)
-  idx_factor<-idx_factor+1
-  chg_map<-tolower(paste('chgmap_', pu_name, T1, T2, sep=''))
-  eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep=""))))
-  eval(parse(text=(paste("factor", idx_factor, "<-'", chg_map, "'", sep='')))) 
-  eval(parse(text=(paste("list_of_data_f<-data.frame(RST_DATA='factor", idx_factor,"', RST_NAME='", chg_map, "', row.names=NULL)", sep=""))))  
-  InFactor_i <- paste("factor", idx_factor, sep="")  
-  dbWriteTable(DB, "list_of_data_f", list_of_data_f, append=TRUE, row.names=FALSE)
-  #write to csv
-  list_of_data_f<-dbReadTable(DB, c("public", "list_of_data_f"))
-  csv_file<-paste(dirname(proj.file),"/csv_factor_data.csv", sep="")
-  write.table(list_of_data_f, csv_file, quote=FALSE, row.names=FALSE, sep=",")  
-  addRasterToPG(project, paste0(chg_map, '.tif'), InFactor_i, srid)
-  resave(idx_lut, idx_factor, file=proj.file)
-} else {
-  lu.db<-dbReadTable(DB, c("public", data_xtab$TBL_DATA))
-}
+# xtab<-tolower(paste('xtab_', pu_name, T1, T2, sep=''))
+# data_xtab<-list_of_data_lut[which(list_of_data_lut$TBL_NAME==xtab),]
 
+dummy1<-data.frame(nPU=lookup_z$ID, divider=nLandCoverId*nLandCoverId)
+dummy1<-expandRows(dummy1, 'divider')
+
+dummy2<-data.frame(nT1=lookup_lc$ID, divider=nLandCoverId)
+dummy2<-expandRows(dummy2, 'divider')
+dummy2<-data.frame(nT1=rep(dummy2$nT1, nPlanningUnitId))
+
+dummy3<-data.frame(nT2=rep(rep(lookup_lc$ID, nLandCoverId), nPlanningUnitId))
+
+landUseChangeMapDummy<-cbind(dummy1, dummy2, dummy3)
+colnames(landUseChangeMapDummy)<-c('ZONE', 'ID_LC1', 'ID_LC2')
+
+#=Create cross-tabulation
+R<-(zone*1) + (landuse1*100^1) + (landuse2*100^2)
+lu.db<-as.data.frame(freq(R))
+lu.db<-na.omit(lu.db)
+n<-3
+k<-0
+lu.db$value_temp<-lu.db$value
+while(k < n) {
+  eval(parse(text=(paste("lu.db$Var", n-k, "<-lu.db$value_temp %% 100", sep=""))))  
+  lu.db$value_temp<-floor(lu.db$value_temp/100)
+  k=k+1
+}
+lu.db$value_temp<-NULL
+#lu.db$value<-NULL
+colnames(lu.db)=c('ID_CHG', 'COUNT', 'ZONE', 'ID_LC1', 'ID_LC2')
+lu.db<-merge(landUseChangeMapDummy, lu.db, by=c('ZONE', 'ID_LC1', 'ID_LC2'), all=TRUE)
+lu.db$ID_CHG<-lu.db$ZONE*1 + lu.db$ID_LC1*100^1 + lu.db$ID_LC2*100^2
+lu.db<-replace(lu.db, is.na(lu.db), 0)
+
+idx_lut<-idx_lut+1
+eval(parse(text=(paste("in_lut", idx_lut, " <- lu.db", sep=""))))
+
+eval(parse(text=(paste("list_of_data_lut<-data.frame(TBL_DATA='in_lut", idx_lut,"', TBL_NAME='", xtab, "', row.names=NULL)", sep=""))))
+# save to PostgreSQL
+InLUT_i <- paste('in_lut', idx_lut, sep="")
+dbWriteTable(DB, InLUT_i, eval(parse(text=(paste(InLUT_i, sep="" )))), append=TRUE, row.names=FALSE)
+dbWriteTable(DB, "list_of_data_lut", list_of_data_lut, append=TRUE, row.names=FALSE)
+
+setwd(result_dir)
+idx_factor<-idx_factor+1
+chg_map<-tolower(paste('chgmap_', pu_name, T1, T2, sep=''))
+eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep=""))))
+
+  
+  
+  
+  
+  
 #=Create individual table for each landuse map
 # set area and classified land use/cover for first landcover and second
 freqLanduse_1<-dbReadTable(DB, c("public", data_luc1$LUT_NAME)) 
@@ -1263,13 +1210,3 @@ unlink(list.files(pattern = ".gri"))
 unlink(list.files(pattern = ".png"))
 
 
-# command2<-paste("start ", "winword ", result_dir, "/LUMENS_Pre-QUES_change_report.lpr", sep="" )
-# shell(command2)
-
-#CLEAN ENVIRONMENT
-#rm(list=ls(all.names=TRUE))
-
-#=Writing final status message (code, message)
-statuscode<-1
-statusmessage<-"Pre-QUES analysis successfully completed!"
-statusoutput<-data.frame(statuscode=statuscode, statusmessage=statusmessage)
