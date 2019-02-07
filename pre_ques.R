@@ -127,17 +127,15 @@ eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTi
   
 #=Create individual table for each landuse map
 # set area and classified land use/cover for first landcover and second
-freqLanduse_1<-dbReadTable(DB, c("public", data_luc1$LUT_NAME)) 
-area_lc1<-subset(freqLanduse_1, select=c('ID','COUNT', 'Classified'))
-colnames(area_lc1) = c("ID", "COUNT_LC1", "Classified1") 
-area_lc1<-merge(area_lc1,lookup_l,by="ID")
-colnames(area_lc1)[4] = "CLASS_LC1"
+freqLanduse_1<-data.frame(freq(landuse1))
+area_lc1<-freqLanduse_1
+colnames(area_lc1) = c("ID", "COUNT_LC1") 
+area_lc1<-merge(area_lc1, lookup_l, by="ID")
 
-freqLanduse_2<-dbReadTable(DB, c("public", data_luc2$LUT_NAME)) 
-area_lc2<-subset(freqLanduse_2, select=c('ID','COUNT', 'Classified'))
-colnames(area_lc2) = c("ID", "COUNT_LC2", "Classified2")
+freqLanduse_2<-data.frame(freq(landuse2))
+area_lc2<-freqLanduse_2
+colnames(area_lc2) = c("ID", "COUNT_LC2")
 area_lc2<-merge(area_lc2,lookup_l,by="ID")
-colnames(area_lc2)[4] = "CLASS_LC2"
 
 # combine all data in data_merge
 colnames(lookup_l)[1]="ID_LC1"
@@ -147,12 +145,12 @@ colnames(lookup_l)[1]="ID_LC2"
 colnames(lookup_l)[2]="LC_t2"
 data_merge <- as.data.frame(merge(data_merge,lookup_l,by="ID_LC2"))
 colnames(lookup_z)[1]="ZONE"
-colnames(lookup_z)[2]="COUNT_ZONE"
-colnames(lookup_z)[3]="Z_NAME"
+# colnames(lookup_z)[2]="COUNT_ZONE"
+colnames(lookup_z)[2]="Z_NAME"
 data_merge <- as.data.frame(merge(data_merge,lookup_z,by="ZONE"))
 data_merge$COUNT<-data_merge$COUNT*Spat_res
 colnames(lookup_l)<-c("ID", "CLASS")
-colnames(lookup_z)<-c("ID", "COUNT_ZONE", "ZONE")
+colnames(lookup_z)<-c("ID", "ZONE")
 area_zone<-lookup_z
 #area<-min(sum(area_zone[,2]), sum(area_lc1[,2]), sum(area_lc2[,2]))
 data_merge_sel <- data_merge[ which(data_merge$COUNT > 0),]
