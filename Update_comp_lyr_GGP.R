@@ -1,0 +1,21 @@
+load("D://ZA/GGP_Fire_Jambi/fire_modeling/qb_sdm_ot_5_fin/qb_sdm_ot_6.RData")
+# raster stack
+comp_lyr <- stack(raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dem.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dist_def_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dist_hph_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dist_hti_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dist_kebun_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dist_set_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_dist_trans_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_distkanal_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_distpeat_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_distriver_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_distroad_log.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_eco.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_kaw.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_LC.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_pop.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_prec_dry.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_prec_warm.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_temp_dry.tif'),
+                  raster('D://ZA/GGP_Fire_Jambi/Maxent_model/Sum_temp_warm.tif'))
