@@ -1,13 +1,3 @@
-## define initial file
-working_directory="D:/GGP/Jambi/Result/"
-landuse_1="D:/GGP/NPV/lc_jb_v4_nodata/lc1990_v4_nodata.tif"
-landuse_2="D:/GGP/NPV/lc_jb_v4_nodata/lc2000_v4_nodata.tif"
-planning_unit="D:/GGP/Jambi/pola_ruang_jambi_48s.tif.tif"
-lookup_lc="data_jambi/table/Land_cover_legend_jambi.csv"
-lookup_z="D:/GGP/Jambi/pola_ruang_jambi_48s.csv"
-##Analysis_option=selection All analysis; Perubahan dominan di tiap zona; Dinamika perubahan di tiap zona (Alpha-Beta); Analisis alur perubahan (Trajectory)
-
-
 #=Load library
 library(rtf)
 library(rgdal)
@@ -28,16 +18,23 @@ library(rpostgis)
 library(magick)
 library(officer)
 
+## define initial file
+working_directory="D:/GGP/Jambi/Result/"
+planning_unit="D:/GGP/Jambi/pola_ruang_jambi_48s.tif.tif"
+lookup_lc="data_jambi/table/Land_cover_legend_jambi.csv"
+lookup_z="D:/GGP/Jambi/pola_ruang_jambi_48s.csv"
+##Analysis_option=selection All analysis; Perubahan dominan di tiap zona; Dinamika perubahan di tiap zona (Alpha-Beta); Analisis alur perubahan (Trajectory)
+
+list_of_files <- list.files("D:/GGP/NPV/lc_jb_v4_nodata/", pattern = ".tif$")
+num_of_files <- length(list_of_files)
+
 Analysis_option=1
 raster.nodata=0
 
 analysis.option<-Analysis_option
 time_start<-paste(eval(parse(text=(paste("Sys.time ()")))), sep="")
 
-## Set initial variables in R environment
-# initial time period
-T1<-1990
-T2<-2000
+Spat_res=1
 
 # Set working directory
 pu_name<-"pola_ruang"
@@ -50,12 +47,6 @@ dir.create(result_dir)
 lookup_z<-read.table(lookup_z, header = T, sep = ",")
 # land cover
 lookup_lc<-read.table(lookup_lc, header = T, sep = ",")
-
-# landuse first time period
-landuse1<-raster(landuse_1)
-# landuse second time period
-landuse2<-raster(landuse_2)
-# zone
 zone <- raster(planning_unit)
 # landcover lookup table
 lookup_l<-lookup_lc
@@ -63,148 +54,150 @@ lookup_lc<-lookup_lc
 colnames(lookup_l)<-c("ID", "CLASS")
 colnames(lookup_lc)<-c("ID", "CLASS")
 
-nLandCoverId<-nrow(lookup_lc)
-nPlanningUnitId<-nrow(lookup_z)
-
-#=Projection handling
-Spat_res=1
-# if (grepl("+units=m", as.character(ref@crs))){
-#   print("Raster maps have projection in meter unit")
-#   Spat_res<-res(ref)[1]*res(ref)[2]/10000
-#   paste("Raster maps have ", Spat_res, " Ha spatial resolution, QuES-C will automatically generate data in Ha unit")
-# } else if (grepl("+proj=longlat", as.character(ref@crs))){
-#   print("Raster maps have projection in degree unit")
-#   Spat_res<-res(ref)[1]*res(ref)[2]*(111319.9^2)/10000
-#   paste("Raster maps have ", Spat_res, " Ha spatial resolution, QuES-C will automatically generate data in Ha unit")
-# } else{
-#   statuscode<-0
-#   statusmessage<-"Raster map projection is unknown"
-#   statusoutput<-data.frame(statuscode=statuscode, statusmessage=statusmessage)
-#   quit()
-# }
-
-#=Create land use change data dummy
-# xtab<-tolower(paste('xtab_', pu_name, T1, T2, sep=''))
-# data_xtab<-list_of_data_lut[which(list_of_data_lut$TBL_NAME==xtab),]
-
-dummy1<-data.frame(nPU=lookup_z$ID, divider=nLandCoverId*nLandCoverId)
-dummy1<-expandRows(dummy1, 'divider')
-
-dummy2<-data.frame(nT1=lookup_lc$ID, divider=nLandCoverId)
-dummy2<-expandRows(dummy2, 'divider')
-dummy2<-data.frame(nT1=rep(dummy2$nT1, nPlanningUnitId))
-
-dummy3<-data.frame(nT2=rep(rep(lookup_lc$ID, nLandCoverId), nPlanningUnitId))
-
-landUseChangeMapDummy<-cbind(dummy1, dummy2, dummy3)
-colnames(landUseChangeMapDummy)<-c('ZONE', 'ID_LC1', 'ID_LC2')
-
-#=Create cross-tabulation
-R<-(zone*1) + (landuse1*100^1) + (landuse2*100^2)
-lu.db<-as.data.frame(freq(R))
-lu.db<-na.omit(lu.db)
-n<-3
-k<-0
-lu.db$value_temp<-lu.db$value
-while(k < n) {
-  eval(parse(text=(paste("lu.db$Var", n-k, "<-lu.db$value_temp %% 100", sep=""))))  
-  lu.db$value_temp<-floor(lu.db$value_temp/100)
-  k=k+1
-}
-lu.db$value_temp<-NULL
-#lu.db$value<-NULL
-colnames(lu.db)=c('ID_CHG', 'COUNT', 'ZONE', 'ID_LC1', 'ID_LC2')
-lu.db<-merge(landUseChangeMapDummy, lu.db, by=c('ZONE', 'ID_LC1', 'ID_LC2'), all=TRUE)
-lu.db$ID_CHG<-lu.db$ZONE*1 + lu.db$ID_LC1*100^1 + lu.db$ID_LC2*100^2
-lu.db<-replace(lu.db, is.na(lu.db), 0)
-
-setwd(result_dir)
-chg_map<-tolower(paste('chgmap_', pu_name, T1, T2, sep=''))
-eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep=""))))
-
+for(d in 1:(num_of_files-1)){
+  T1<-as.numeric(substr(list_of_files[d], 3, 6))
+  T2<-as.numeric(substr(list_of_files[d+1], 3, 6))
   
-
+  landuse_1 <- paste0("D:/GGP/NPV/lc_jb_v4_nodata/", list_of_files[d])
+  landuse_2 <- paste0("D:/GGP/NPV/lc_jb_v4_nodata/", list_of_files[d+1])
   
-#=Create individual table for each landuse map
-# set area and classified land use/cover for first landcover and second
-freqLanduse_1<-data.frame(freq(landuse1))
-area_lc1<-freqLanduse_1
-colnames(area_lc1) = c("ID", "COUNT_LC1") 
-area_lc1<-merge(area_lc1, lookup_l, by="ID")
+  # landuse first time period
+  landuse1<-raster(landuse_1)
+  # landuse second time period
+  landuse2<-raster(landuse_2)
 
-freqLanduse_2<-data.frame(freq(landuse2))
-area_lc2<-freqLanduse_2
-colnames(area_lc2) = c("ID", "COUNT_LC2")
-area_lc2<-merge(area_lc2,lookup_l,by="ID")
+  nLandCoverId<-nrow(lookup_lc)
+  nPlanningUnitId<-nrow(lookup_z)
 
-# combine all data in data_merge
-colnames(lookup_l)[1]="ID_LC1"
-colnames(lookup_l)[2]="LC_t1"
-data_merge <- merge(lu.db,lookup_l,by="ID_LC1")
-colnames(lookup_l)[1]="ID_LC2"
-colnames(lookup_l)[2]="LC_t2"
-data_merge <- as.data.frame(merge(data_merge,lookup_l,by="ID_LC2"))
-colnames(lookup_z)[1]="ZONE"
-# colnames(lookup_z)[2]="COUNT_ZONE"
-colnames(lookup_z)[2]="Z_NAME"
-data_merge <- as.data.frame(merge(data_merge,lookup_z,by="ZONE"))
-data_merge$COUNT<-data_merge$COUNT*Spat_res
-colnames(lookup_l)<-c("ID", "CLASS")
-colnames(lookup_z)<-c("ID", "ZONE")
-area_zone<-lookup_z
-#area<-min(sum(area_zone[,2]), sum(area_lc1[,2]), sum(area_lc2[,2]))
-data_merge_sel <- data_merge[ which(data_merge$COUNT > 0),]
-data_merge_sel$LU_CHG <- do.call(paste, c(data_merge_sel[c("LC_t1", "LC_t2")], sep = " to "))
-
-#=Create land use change map
-# eval(parse(text=(paste("write.dbf(data_merge,'lu.db_", pu_name ,"_", T1, "_", T2, ".dbf')", sep=""))))
-
-#=Calculate top ten largest land use changes 
-# create IDC, the difference between two ID_L, which is used to see the changes in land cover
-# then remove unchanged land cover, and finally save the top ten largest changes
-lg_chg <- data_merge_sel
-lg_chg$ID1<-as.numeric(as.character((lg_chg$ID_LC1)))
-lg_chg$ID2<-as.numeric(as.character((lg_chg$ID_LC2)))
-lg_chg$IDC<-lg_chg$ID1-lg_chg$ID2
-lg_chg<-lg_chg[ which(lg_chg$IDC!=0),]
-lg_chg <- as.data.frame(lg_chg[order(-lg_chg$COUNT),])
-lg_chg$CHG_CODE<-as.factor(toupper(abbreviate(lg_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
-lg_chg$ID1<-lg_chg$ID2<-lg_chg$IDC<-NULL
-# top ten changes
-lg_chg_top<-head(lg_chg, n=10)
-lg_chg_top$LC_t1<-lg_chg_top$LC_t2<-NULL
-# summary of landuse dominant change
-chg_only<-aggregate(COUNT~LU_CHG,data=lg_chg,FUN=sum)
-chg_only$CHG_CODE<-as.factor(toupper(abbreviate(chg_only$LU_CHG, minlength=5, strict=FALSE, method="both")))
-chg_only<-chg_only[order(-chg_only$COUNT),]
-chg_only<-chg_only[c(1,3,2)]
-# top ten dominant changes based on landuse/cover change
-chg_only_top<-head(chg_only, n=10)
-# summary of zonal dominant change
-lg_chg_zonal<-as.data.frame(NULL)
-for (l in 1:length(area_zone$ID)){
-  tryCatch({
-    a<-(area_zone$ID)[l]
-    lg_chg_z<-lg_chg
-    lg_chg_z<-as.data.frame(lg_chg_z[which(lg_chg_z$ZONE == a),])
-    lg_chg_z<-aggregate(COUNT~ZONE+LU_CHG,data=lg_chg_z,FUN=sum)
-    lg_chg_z$CHG_CODE<-as.factor(toupper(abbreviate(lg_chg_z$LU_CHG, minlength=5, strict=FALSE, method="both")))
-    lg_chg_z<-lg_chg_z[order(-lg_chg_z$COUNT),]
-    lg_chg_z<-lg_chg_z[c(1,2,4,3)]
-    #top ten dominant changes based on planning unit
-    lg_chg_z_10<-head(lg_chg_z,n=10)
-    lg_chg_zonal<-rbind(lg_chg_zonal,lg_chg_z_10)
-  },error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+  dummy1<-data.frame(nPU=lookup_z$ID, divider=nLandCoverId*nLandCoverId)
+  dummy1<-expandRows(dummy1, 'divider')
+  
+  dummy2<-data.frame(nT1=lookup_lc$ID, divider=nLandCoverId)
+  dummy2<-expandRows(dummy2, 'divider')
+  dummy2<-data.frame(nT1=rep(dummy2$nT1, nPlanningUnitId))
+  
+  dummy3<-data.frame(nT2=rep(rep(lookup_lc$ID, nLandCoverId), nPlanningUnitId))
+  
+  landUseChangeMapDummy<-cbind(dummy1, dummy2, dummy3)
+  colnames(landUseChangeMapDummy)<-c('ZONE', 'ID_LC1', 'ID_LC2')
+  
+  #=Create cross-tabulation
+  R<-(zone*1) + (landuse1*100^1) + (landuse2*100^2)
+  lu.db<-as.data.frame(freq(R))
+  lu.db<-na.omit(lu.db)
+  n<-3
+  k<-0
+  lu.db$value_temp<-lu.db$value
+  while(k < n) {
+    eval(parse(text=(paste("lu.db$Var", n-k, "<-lu.db$value_temp %% 100", sep=""))))  
+    lu.db$value_temp<-floor(lu.db$value_temp/100)
+    k=k+1
+  }
+  lu.db$value_temp<-NULL
+  #lu.db$value<-NULL
+  colnames(lu.db)=c('ID_CHG', 'COUNT', 'ZONE', 'ID_LC1', 'ID_LC2')
+  lu.db<-merge(landUseChangeMapDummy, lu.db, by=c('ZONE', 'ID_LC1', 'ID_LC2'), all=TRUE)
+  lu.db$ID_CHG<-lu.db$ZONE*1 + lu.db$ID_LC1*100^1 + lu.db$ID_LC2*100^2
+  lu.db<-replace(lu.db, is.na(lu.db), 0)
+  
+  result_dir<-paste0("D:/GGP/Jambi/Result/PreQUES_", T1, "_",  T2)
+  dir.create(result_dir)
+  setwd(result_dir)
+  chg_map<-tolower(paste('chgmap_', pu_name, T1, T2, sep=''))
+  eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep=""))))
+    
+  #=Create individual table for each landuse map
+  # set area and classified land use/cover for first landcover and second
+  freqLanduse_1<-data.frame(freq(landuse1))
+  area_lc1<-freqLanduse_1
+  colnames(area_lc1) = c("ID", "COUNT_LC1") 
+  area_lc1<-merge(area_lc1, lookup_l, by="ID")
+  
+  freqLanduse_2<-data.frame(freq(landuse2))
+  area_lc2<-freqLanduse_2
+  colnames(area_lc2) = c("ID", "COUNT_LC2")
+  area_lc2<-merge(area_lc2,lookup_l,by="ID")
+  
+  # combine all data in data_merge
+  colnames(lookup_l)[1]="ID_LC1"
+  colnames(lookup_l)[2]="LC_t1"
+  data_merge <- merge(lu.db,lookup_l,by="ID_LC1")
+  colnames(lookup_l)[1]="ID_LC2"
+  colnames(lookup_l)[2]="LC_t2"
+  data_merge <- as.data.frame(merge(data_merge,lookup_l,by="ID_LC2"))
+  colnames(lookup_z)[1]="ZONE"
+  # colnames(lookup_z)[2]="COUNT_ZONE"
+  colnames(lookup_z)[2]="Z_NAME"
+  data_merge <- as.data.frame(merge(data_merge,lookup_z,by="ZONE"))
+  data_merge$COUNT<-data_merge$COUNT*Spat_res
+  colnames(lookup_l)<-c("ID", "CLASS")
+  colnames(lookup_z)<-c("ID", "ZONE")
+  area_zone<-lookup_z
+  #area<-min(sum(area_zone[,2]), sum(area_lc1[,2]), sum(area_lc2[,2]))
+  data_merge_sel <- data_merge[ which(data_merge$COUNT > 0),]
+  data_merge_sel$LU_CHG <- do.call(paste, c(data_merge_sel[c("LC_t1", "LC_t2")], sep = " to "))
+  
+  lg_chg <- data_merge_sel
+  lg_chg$ID1<-as.numeric(as.character((lg_chg$ID_LC1)))
+  lg_chg$ID2<-as.numeric(as.character((lg_chg$ID_LC2)))
+  lg_chg$IDC<-lg_chg$ID1-lg_chg$ID2
+  lg_chg<-lg_chg[ which(lg_chg$IDC!=0),]
+  lg_chg <- as.data.frame(lg_chg[order(-lg_chg$COUNT),])
+  lg_chg$CHG_CODE<-as.factor(toupper(abbreviate(lg_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  lg_chg$ID1<-lg_chg$ID2<-lg_chg$IDC<-NULL
+  # top ten changes
+  lg_chg_top<-head(lg_chg, n=10)
+  lg_chg_top$LC_t1<-lg_chg_top$LC_t2<-NULL
+  # summary of landuse dominant change
+  chg_only<-aggregate(COUNT~LU_CHG,data=lg_chg,FUN=sum)
+  chg_only$CHG_CODE<-as.factor(toupper(abbreviate(chg_only$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  chg_only<-chg_only[order(-chg_only$COUNT),]
+  chg_only<-chg_only[c(1,3,2)]
+  # top ten dominant changes based on landuse/cover change
+  chg_only_top<-head(chg_only, n=10)
+  
+  
+  # summary of zonal dominant change
+  lg_chg_zonal<-as.data.frame(NULL)
+  for(l in 1:length(area_zone$ID)){
+    tryCatch({
+      a<-(area_zone$ID)[l]
+      lg_chg_z<-lg_chg
+      lg_chg_z<-as.data.frame(lg_chg_z[which(lg_chg_z$ZONE == a),])
+      lg_chg_z<-aggregate(COUNT~ZONE+LU_CHG,data=lg_chg_z,FUN=sum)
+      lg_chg_z$CHG_CODE<-as.factor(toupper(abbreviate(lg_chg_z$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      lg_chg_z<-lg_chg_z[order(-lg_chg_z$COUNT),]
+      lg_chg_z<-lg_chg_z[c(1,2,4,3)]
+      #top ten dominant changes based on planning unit
+      lg_chg_z_10<-head(lg_chg_z,n=10)
+      lg_chg_zonal<-rbind(lg_chg_zonal,lg_chg_z_10)
+    },error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+  }
+  # produce chart of largest source of changes in landuse
+  location="Jambi"
+  colnames(chg_only_top)[3]<-"COUNT"
+  Largest.chg<- ggplot(data=chg_only_top, aes(x=reorder(CHG_CODE, -COUNT),y=COUNT, fill=CHG_CODE))+geom_bar(stat='identity',position='dodge')+
+    geom_text(data=chg_only_top, aes(x=CHG_CODE, y=COUNT, label=round(COUNT, 1)),size=3, vjust=0.1) +
+    ggtitle(paste("10 Perubahan Tutupan Lahan Dominan di", location, T1,"-",T2 )) +
+    labs(x = 'Jenis perubahan penutupan lahan', y='Luas area (Ha)') + guides(fill=FALSE)+
+    theme(plot.title = element_text(lineheight= 5, face="bold")) + scale_y_continuous() +
+    theme(axis.title.x=element_blank(), axis.text.x = element_text(size=8),
+          panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+  
+  write.table(data_merge, file = paste0('chgtbl_', T1, T2), sep = ",", row.names = F)
+  setwd(working_directory)
 }
-# produce chart of largest source of changes in landuse
-colnames(chg_only_top)[3]<-"COUNT"
-Largest.chg<- ggplot(data=chg_only_top, aes(x=reorder(CHG_CODE, -COUNT),y=COUNT, fill=CHG_CODE))+geom_bar(stat='identity',position='dodge')+
-  geom_text(data=chg_only_top, aes(x=CHG_CODE, y=COUNT, label=round(COUNT, 1)),size=3, vjust=0.1) +
-  ggtitle(paste("10 Perubahan Tutupan Lahan Dominan di", location, T1,"-",T2 )) +
-  labs(x = 'Jenis perubahan penutupan lahan', y='Luas area (Ha)') + guides(fill=FALSE)+
-  theme(plot.title = element_text(lineheight= 5, face="bold")) + scale_y_continuous() +
-  theme(axis.title.x=element_blank(), axis.text.x = element_text(size=8),
-        panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
+library(mschart)
+preques_ppt <- read_pptx()
+tes <- ms_barchart(data = chg_only_top, x = "CHG_CODE", y = "COUNT")
+preques_ppt <- add_slide(preques_ppt, layout = "Title and Content", master = "Office Theme") 
+ph_with_chart(preques_ppt, tes)
+
+print(preques_ppt, target=paste0(working_directory, "/preques_ppt_chart2.pptx"))
+
+
+
 
 #=Create overall summary of land use change
 lut.lc<-lut.lc[which(lut.lc$ID!=raster.nodata),]
