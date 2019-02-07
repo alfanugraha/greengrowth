@@ -1,2 +1,2 @@
-# green_growth
+# Green Growth
 Green Growth Compilation Scripts
