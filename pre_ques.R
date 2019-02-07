@@ -28,12 +28,13 @@ library(rpostgis)
 library(magick)
 library(officer)
 
+Analysis_option=1
+raster.nodata=0
+
 analysis.option<-Analysis_option
 time_start<-paste(eval(parse(text=(paste("Sys.time ()")))), sep="")
 
 ## Set initial variables in R environment
-Analysis_option=1
-raster.nodata=0
 # initial time period
 T1<-1990
 T2<-2000
@@ -41,7 +42,7 @@ T2<-2000
 # Set working directory
 pu_name<-"pola_ruang"
 idx_PreQUES<-1
-result_dir<-paste(idx_PreQUES, "_PreQUES_",T1,"_",T2,"_",pu_name,sep="")
+result_dir<-working_directory
 dir.create(result_dir)
 
 ## load tabular data
@@ -117,24 +118,12 @@ lu.db<-merge(landUseChangeMapDummy, lu.db, by=c('ZONE', 'ID_LC1', 'ID_LC2'), all
 lu.db$ID_CHG<-lu.db$ZONE*1 + lu.db$ID_LC1*100^1 + lu.db$ID_LC2*100^2
 lu.db<-replace(lu.db, is.na(lu.db), 0)
 
-idx_lut<-idx_lut+1
-eval(parse(text=(paste("in_lut", idx_lut, " <- lu.db", sep=""))))
-
-eval(parse(text=(paste("list_of_data_lut<-data.frame(TBL_DATA='in_lut", idx_lut,"', TBL_NAME='", xtab, "', row.names=NULL)", sep=""))))
-# save to PostgreSQL
-InLUT_i <- paste('in_lut', idx_lut, sep="")
-dbWriteTable(DB, InLUT_i, eval(parse(text=(paste(InLUT_i, sep="" )))), append=TRUE, row.names=FALSE)
-dbWriteTable(DB, "list_of_data_lut", list_of_data_lut, append=TRUE, row.names=FALSE)
-
 setwd(result_dir)
-idx_factor<-idx_factor+1
 chg_map<-tolower(paste('chgmap_', pu_name, T1, T2, sep=''))
 eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep=""))))
 
   
-  
-  
-  
+
   
 #=Create individual table for each landuse map
 # set area and classified land use/cover for first landcover and second
