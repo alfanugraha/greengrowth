@@ -34,3 +34,6 @@ Green Growth Compilation Scripts
 | DRIEST TEMPERATURE | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_temp_dry.tif | `landuse[n]` |
 | DRIEST TEMPERATURE | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_temp_dry.tif | `landuse[n]` |
 | DRIEST PRECIPITATION | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_prec_dry.tif | `landuse[n]` |
+| LAND DESIGNATION | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_kaw.tif | `landuse[n]` |
+| POPULATION DENS | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_pop.tif | `landuse[n]` |
+| DEM | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dem.tif | `landuse[n]` |
