@@ -1,1 +1,0 @@
-# AD is ready for conflict resolution

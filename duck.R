@@ -1,1 +1,0 @@
-#makan duck
