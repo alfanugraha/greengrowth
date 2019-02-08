@@ -37,3 +37,13 @@ Green Growth Compilation Scripts
 | LAND DESIGNATION | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_kaw.tif | `landuse[n]` |
 | POPULATION DENS | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_pop.tif | `landuse[n]` |
 | DEM | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dem.tif | `landuse[n]` |
+| Dist.Covariates:HPH | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dist_hph_log.tif | `landuse[n]` |
+| Dist.Covariates:HTI | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dist_hti_log.tif | `landuse[n]` |
+| Dist.Covariates:KEBUN | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dist_kebun_log.tif | `landuse[n]` |
+| Dist.Covariates:DEFOREST | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dist_def_log.tif | `landuse[n]` |
+| Dist.Covariates:SETTLEMENT | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dist_set_log.tif | `landuse[n]` |
+| Dist.Covariates:KANAL | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_distkanal_log.tif | `landuse[n]` |
+| Dist.Covariates:TRANSMIGRANT | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_dist_trans_log.tif | `landuse[n]` |
+| Dist.Covariates:ROAD | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_distroad_log.tif | `landuse[n]` |
+| Dist.Covariates:RIVER | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_distriver_log.tif  | `landuse[n]` |
+| Dist.Covariates:PEAT | \\IDH_Green_Growth\\Jambi\\1_Data\\1_Spatial\\3_Result\\2_Raster\\Fire_modeling\\Fire_BAU_Jambi\\Maxent_model\\Sum_distpeat_log.tif  | `landuse[n]` |
