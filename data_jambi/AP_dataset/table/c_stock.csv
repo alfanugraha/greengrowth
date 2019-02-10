@@ -1,0 +1,30 @@
+ID,Landcover,Cstock
+0,No data,0
+1,Undisturbed forest,259.7069109
+2,Logged over forest-high density,173.0583523
+3,Logged over forest-low density,100.7208365
+4,Undisturbed swamp forest,246.8814421
+5,Logged over swamp forest,200.3483758
+6,Undisturbed mangrove,322.4594448
+7,Logged over mangrove,53.75170909
+8,Industrial timber,51.4
+9,Mixed garden,184.4
+10,Coffee agroforest,18.1
+11,Rubber agroforest,68.3
+12,Rubber,55.7
+13,Oil palm,39.95333333
+14,Cinnamon agroforest,46.40633025
+15,Cinnamon monoculture,46.40633025
+16,Coconut - bettlenut agroforest,77.74002788
+17,Coconut monoculture,51.14017436
+18,Tea,57
+19,Rice field,0.990853143
+20,Other crops,0.71507
+21,Shrub,33.42736284
+22,Grass,1.492418237
+23,Cleared land,0
+24,Settlement,0
+25,Fish pond,0
+26,Waterbody,0
+27,Cloud,0
+28,Shadow,0

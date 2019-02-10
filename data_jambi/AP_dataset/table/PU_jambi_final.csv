@@ -1,0 +1,66 @@
+ID_Z,PU_legend
+1,Protection area; Wetland_PHA-Mineral; No concession
+2,Other area; Wetland_PHA-Mineral; No concession
+3,Other area; Wetland_PHA-Peat; No concession
+4,Other area; Wetland_Non-PHA; No concession
+5,Production area; Wetland_Non-PHA; HTI
+6,Production area; Wetland_Non-PHA; No concession
+7,Production area; Wetland_PHA-Peat; No concession
+8,Production area; Wetland_PHA-Peat; HTI
+9,Protection area; Wetland_PHA-Peat; No concession
+10,Protection area; Wetland_Non-PHA; No concession
+11,Production area; Wetland_PHA-Mineral; HTI
+12,Production area; Wetland_PHA-Mineral; No concession
+13,Other area; Wetland_PHA-Mineral; HTI
+14,Conservation area; Wetland_Non-PHA; No concession
+15,Conservation area; Wetland_PHA-Mineral; No concession
+16,Other area; Wetland_Non-PHA; HTI
+17,Other area; Wetland_Non-PHA; HGU
+18,Other area; Wetland_PHA-Mineral; HGU
+19,Other area; Wetland_PHA-Peat; HGU
+20,Protection area; Wetland_PHA-Mineral; HGU
+21,Protection area; Wetland_Non-PHA; HGU
+22,Protection area; Lowland_Non-PHA; No concession
+23,Other area; Lowland_PHA-Mineral; No concession
+24,Protection area; Lowland_PHA-Mineral; No concession
+25,Other area; Lowland_Non-PHA; No concession
+26,Production area; Lowland_Non-PHA; HTI
+27,Other area; Lowland_Non-PHA; HTI
+28,Protection area; Lowland_Non-PHA; HTI
+29,Production area; Lowland_Non-PHA; No concession
+30,Other area; Wetland_PHA-Peat; HTI
+31,Conservation area; Lowland_Non-PHA; No concession
+32,Protection area; Wetland_PHA-Peat; HTI
+33,Protection area; Wetland_PHA-Mineral; HTI
+34,Production area; Wetland_Non-PHA; HGU
+35,Other area; Lowland_Non-PHA; HGU
+36,Protection area; Lowland_Non-PHA; HGU
+37,Production area; Lowland_Non-PHA; HGU
+38,Production area; Wetland_PHA-Peat; HGU
+39,Protection area; Wetland_PHA-Peat; HGU
+40,Production area; Wetland_PHA-Mineral; HGU
+41,Production area; Lowland_PHA-Mineral; HTI
+42,Other area; Lowland_PHA-Mineral; HTI
+43,Production area; Lowland_PHA-Mineral; No concession
+44,Conservation area; Wetland_PHA-Mineral; HGU
+45,Conservation area; Wetland_PHA-Peat; No concession
+46,Conservation area; Wetland_PHA-Peat; HGU
+47,Other area; Lowland_PHA-Mineral; HGU
+48,Conservation area; Lowland_Non-PHA; HGU
+49,Other area; Wetland_PHA-Peat; HPH
+50,Production area; Wetland_PHA-Peat; HPH
+51,Protection area; Wetland_PHA-Peat; HPH
+52,Protection area; Lowland_PHA-Mineral; HGU
+53,Conservation area; Lowland_Non-PHA; HTI
+54,Protection area; Wetland_PHA-Mineral; HPH
+55,Conservation area; Montane_Non-PHA; No concession
+56,Production area; Montane_Non-PHA; HTI
+57,Other area; Montane_Non-PHA; HTI
+58,Conservation area; Montane_Non-PHA; HTI
+59,Other area; Montane_Non-PHA; No concession
+60,Production area; Montane_Non-PHA; No concession
+61,Other area; Montane_Non-PHA; HGU
+62,Protection area; Montane_Non-PHA; No concession
+63,Production area; Montane_Non-PHA; HGU
+64,Protection area; Montane_Non-PHA; HGU
+65,Conservation area; Montane_Non-PHA; HGU

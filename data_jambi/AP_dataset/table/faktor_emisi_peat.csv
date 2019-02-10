@@ -1,0 +1,30 @@
+ID,Landcover,Peat_Em
+0,No data,0
+1,Undisturbed forest,0
+2,Logged over forest-high density,0
+3,Logged over forest-low density,0
+4,Undisturbed swamp forest,0
+5,Logged over swamp forest,19
+6,Undisturbed mangrove,0
+7,Logged over mangrove,0
+8,Industrial timber,73
+9,Mixed garden,43
+10,Coffee agroforest,43
+11,Rubber agroforest,43
+12,Rubber,40
+13,Oil palm,40
+14,Cinnamon agroforest,43
+15,Cinnamon monoculture,40
+16,Coconut - bettlenut agroforest,43
+17,Coconut monoculture,40
+18,Tea,51
+19,Rice field,51
+20,Other crops,51
+21,Shrub,19
+22,Grass,43
+23,Cleared land,51
+24,Settlement,43
+25,Fish pond,0
+26,Waterbody,0
+27,Cloud,0
+28,Shadow,0
