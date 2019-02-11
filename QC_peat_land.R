@@ -29,7 +29,11 @@ library(tidyverse)
 library(mschart)
 library(officer)
 
+<<<<<<< HEAD
 # PreQUES # QUES_C process should be refer from PreQUES result ####
+=======
+## PreQUES (NOT TO BE COMPILED! FOR TESTING PURPOSE ONLY)####################################################################################################################################################
+>>>>>>> 1895fe47ec1f097df669d8fcf71d9ecae7a9ef38
 
 ## define initial file
 working_directory="F:/GGP/Jambi/Result/"
@@ -51,7 +55,7 @@ Spat_res=1
 
 # Set working directory
 pu_name<-"plan_unit"
-idx_PreQUES<-1
+idx_PreQUES<-1 # ADreview: idx shall be retreived from the proj.file and then added by 1 as the process runs
 result_dir<-working_directory
 dir.create(result_dir)
 
@@ -117,7 +121,7 @@ for(d in 1:(num_of_files-1)){
   dir.create(result_dir)
   setwd(result_dir)
   chg_map<-tolower(paste('chgmap_', pu_name, T1,'_', T2, sep=''))
-  eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep=""))))
+  eval(parse(text=(paste("writeRaster(R, filename='", chg_map, ".tif', format='GTiff', overwrite=TRUE)", sep="")))) # ADreview: what does 'R' stand for
   
   #=Create individual table for each landuse map
   # set area and classified land use/cover for first landcover and second
@@ -217,7 +221,7 @@ save.image(file = proj.file)
 # select the .lpj based on which the project shall be executed
 proj.file <- "F:/GGP/Jambi/Result/PreQUES.lpj"
 load(proj.file)
-idx_QUES_C<-1
+idx_QUES_C<-1 # # ADreview: idx shall be retreived from the proj.file and then added by 1 as the process runs
 
 ## define initial file
 cstock="F:/GGP/jambi/table/c_stock.csv"
