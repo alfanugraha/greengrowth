@@ -1,5 +1,4 @@
-# library-----
-# libraries with no duplicates====
+#library####
 library(rtf)
 library(rasterVis)
 library(ggplot2)
@@ -30,7 +29,7 @@ library(tidyverse)
 library(mschart)
 library(officer)
 
-## PreQUES ####################################################################################################################################################
+# PreQUES # QUES_C process should be refer from PreQUES result ####
 
 ## define initial file
 working_directory="F:/GGP/Jambi/Result/"
@@ -213,9 +212,8 @@ print(preques_ppt, target=paste0(working_directory, "/preques_ppt_chart2.pptx"))
 proj.file<-paste(working_directory, "PreQUES.lpj", sep="")
 save.image(file = proj.file)
 
-## QUES_C ####################################################################################################################################################
-
-# Setting up basic database parameters====
+# QUES_C ####
+# Setting up basic database parameters ####
 # select the .lpj based on which the project shall be executed
 proj.file <- "F:/GGP/Jambi/Result/PreQUES.lpj"
 load(proj.file)
@@ -239,8 +237,7 @@ if (pu_name=="ref") {
   lookup_z <- lookup_z[ , c(1,2)]
 }
 
-# standardized column names
-# extract peat planning unit IDs
+# extract peat planning unit IDs ####
 peat_keyword <- "eat"
 peat_puID <- lookup_z[grep(peat_keyword, lookup_z[,2]) , 1]
 cstock<-read.table(cstock, header = T, sep = ",")
@@ -251,19 +248,23 @@ em_peat<-read.table(em_peat, header = T, sep = ",")
 ref <- ref*10^6
 
 # chgmap list
-list_of_chgmap <- list.files(result_dir, pattern = ".tif$")
+list_of_chgmap <- list.files("F:/GGP/Jambi/raster/Chgmap/", pattern = ".tif$")
 num_of_chgmap <- length(list_of_chgmap)
 
 # LOOPING FRAMEWORK FOR EACH TIMESTEP====
-for(ts in 1: (length(num_of_chgmap))){
+for(ts in 1: (num_of_chgmap)){
   
+  # setting periode for QUES_C
+  T1<-as.numeric(substr(list_of_files[ts], 3, 6))
+  T2<-as.numeric(substr(list_of_files[ts+1], 3, 6))
+
   # eval(parse(text=(paste(list_of_chgmap, overwrite=TRUE, sep=""))))
-  ti1<-as.numeric(substr(list_of_files[+5], 3, 6))
-  ti2<-as.numeric(substr(list_of_files[+6], 3, 6))
+  ti1<-as.numeric(substr(list_of_files[ts], 3, 6))
+  ti2<-as.numeric(substr(list_of_files[ts+1], 3, 6))
   d_ti <- ti2-ti1 # delta year
   
   # combine with admin data
-  chg_map<- paste0(result_dir, "/", list_of_chgmap)
+  chg_map<- paste0("F:/GGP/Jambi/raster/Chgmap/", list_of_chgmap[ts])
   chg_map<- raster(chg_map)
   ch_map <- ref+chg_map
   
@@ -343,22 +344,27 @@ for(ts in 1: (length(num_of_chgmap))){
     summary_table <- data.frame(PERIOD = paste0(ti1, "-", ti2), G_Em = sum(fr_chMap$Em_co2Eq), Seq = sum(fr_chMap$Seq), P_Em = sum(fr_chMap$EmPeatTot), stringsAsFactors = FALSE)
   } else {
     summary_add <- data.frame(PERIOD = paste0(ti1, "-", ti2), G_Em = sum(fr_chMap$Em_co2Eq), Seq = sum(fr_chMap$Seq), P_Em = sum(fr_chMap$EmPeatTot), stringsAsFactors = FALSE)
+    summary_add$NettAll <- summary_add$G_Em - summary_add$Seq + summary_add$P_Em
     summary_table <- data.frame(rbind(summary_table, summary_add), stringsAsFactors = FALSE)
   }
   
   # SumTab \ends----
   if(ts == (length(num_of_chgmap))){
     summary_table$NettAll <- summary_table$G_Em - summary_table$Seq + summary_table$P_Em
-    write.csv(summary_table, "summary_emission.csv", row.names = FALSE)
-    write.csv(carb_compile, "emission_LCdynamics.csv", row.names = FALSE)
   }
-  # QUES_C_ppt <- read_pptx()
-  # tes <- ms_barchart(data = fr_chMap, x = "CHG_CODE", y = "COUNT")
-  # QUES_C_ppt <- add_slide(QUES_C_ppt, layout = "Title and Content", master = "Office Theme") 
-  # ph_with_chart(QUES_C_ppt, tes)
-  # print(QUES_C_ppt, target=paste0(result_dir, "/QUES_C_ppt_chart1.pptx"))
   setwd(working_directory)
 }
+
+# Extract table
+write.table(summary_table, file = paste0('summary_emission.csv'), sep = ",", row.names = FALSE)
+write.table(carb_compile, file = paste0('emission_LCdynamics.csv'), sep = ",", row.names = FALSE)
+
+# Print ppt
+# QUES_C_ppt <- read_pptx()
+# em_test <- ms_barchart(data = fr_chMap, x = "ZONE", y = "COUNT")
+# QUES_C_ppt <- add_slide(QUES_C_ppt, layout = "Title and Content", master = "Office Theme")
+# ph_with_chart(QUES_C_ppt, em_test)
+# print(QUES_C_ppt, target=paste0(result_dir, "/QUES_C_ppt_chart1.pptx"))
 
 #save project file
 proj.file<-paste(working_directory, "QUES_C.lpj", sep="")
