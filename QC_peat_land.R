@@ -171,7 +171,7 @@ for(d in 1:(num_of_files-1)){
   # top ten dominant changes based on landuse/cover change
   chg_only_top<-head(chg_only, n=10)
   
-    # summary of zonal dominant change
+  # summary of zonal dominant change
   lg_chg_zonal<-as.data.frame(NULL)
   for(l in 1:length(area_zone$ID)){
     tryCatch({
@@ -314,12 +314,6 @@ for(ts in 1: (num_of_chgmap)){
   dir.create(result_dir)
   setwd(result_dir)
   
-  # Generate emission and sequestration map
-  em_map <- reclassify(ch_map, rec_table[, c("value", "Em_px")])
-  writeRaster(em_map, paste0("Em_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
-  seq_map <- reclassify(ch_map, rec_table[, c("value", "Seq_px")])
-  writeRaster(seq_map, paste0("Seq_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
-  
   # Peat_puID contains numbers which stand for id of pu containing peat
   for(w in 1:2){
     em_peatMod <- em_peat[, c(1, 3)]
@@ -349,56 +343,227 @@ for(ts in 1: (num_of_chgmap)){
  
   # Extract carbon compile per period
   carb_compile_period <- data.frame(fr_chMap, stringsAsFactors = FALSE)
+  
+  # Calculate Total_Em & net_em
+  carb_compile_period$Tot_Em <- carb_compile_period$Em_co2Eq + carb_compile_period$EmPeatTot
+  carb_compile_period$Nett_Em <- carb_compile_period$Tot_Em - carb_compile_period$Seq
   write.table(carb_compile_period, file = paste0("emission_LCdynamics_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
   
-  # Top seq-em changes process
+  # Sort preparation process
   carb_compile_period_sel <- carb_compile_period[ which(carb_compile_period$count > 0),]
   carb_compile_period_sel$LU_CHG <- do.call(paste, c(carb_compile_period_sel[c("LC_1", "LC_2")], sep = " to "))
-  cb_chg <- carb_compile_period_sel
-  cb_chg$ID1<-as.numeric(as.character((cb_chg$ID_T1)))
-  cb_chg$ID2<-as.numeric(as.character((cb_chg$ID_T2)))
-  cb_chg$IDC<-cb_chg$ID_T1-cb_chg$ID_T2
-  cb_chg<-cb_chg[ which(cb_chg$IDC!=0),]
+  Cb_chg <- carb_compile_period_sel
+  Cb_chg$ID1<-as.numeric(as.character((Cb_chg$ID_T1)))
+  Cb_chg$ID2<-as.numeric(as.character((Cb_chg$ID_T2)))
+  Cb_chg$IDC<-Cb_chg$ID_T1-Cb_chg$ID_T2
+  Cb_chg<-Cb_chg[ which(Cb_chg$IDC!=0),]
   
-  # top ten seq
-  sq_chg <- as.data.frame(cb_chg[order(-cb_chg$Seq),])
-  sq_chg$CHG_CODE<-as.factor(toupper(abbreviate(sq_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
-  sq_chg$ID1<-sq_chg$ID2<-sq_chg$IDC<-NULL
-  sq_chg_top<-head(sq_chg, n=10)
-  sq_chg_top$LC_t1<-sq_chg_top$LC_t2<-NULL
+  # Summary top ten seq
+  Sq_chg <- as.data.frame(Cb_chg[order(-Cb_chg$Seq),])
+  Sq_chg$CHG_CODE<-as.factor(toupper(abbreviate(Sq_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  Sq_chg$ID1<-Sq_chg$ID2<-Sq_chg$IDC<-NULL
+  Sq_chg_top<-head(Sq_chg, n=10)
+  Sq_chg_top$LC_t1<-Sq_chg_top$LC_t2<-NULL
   
-  # top ten em mineral  
-  em_chg <- as.data.frame(cb_chg[order(-cb_chg$Em_co2Eq),])
-  em_chg$CHG_CODE<-as.factor(toupper(abbreviate(em_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
-  em_chg$ID1<-em_chg$ID2<-em_chg$IDC<-NULL
-  em_chg_top<-head(em_chg, n=10)
-  em_chg_top$LC_t1<-em_chg_top$LC_t2<-NULL  
+  # Summary top ten em mineral  
+  Em_chg <- as.data.frame(Cb_chg[order(-Cb_chg$Em_co2Eq),])
+  Em_chg$CHG_CODE<-as.factor(toupper(abbreviate(Em_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  Em_chg$ID1<-Em_chg$ID2<-Em_chg$IDC<-NULL
+  Em_chg_top<-head(Em_chg, n=10)
+  Em_chg_top$LC_t1<-Em_chg_top$LC_t2<-NULL  
   
-  # top ten em peat
-  empeat_chg <- as.data.frame(cb_chg[order(-cb_chg$EmPeatTot),])
-  empeat_chg$CHG_CODE<-as.factor(toupper(abbreviate(empeat_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
-  empeat_chg$ID1<-empeat_chg$ID2<-empeat_chg$IDC<-NULL
-  empeat_chg_top<-head(empeat_chg, n=10)
-  empeat_chg_top$LC_t1<-empeat_chg_top$LC_t2<-NULL
+  # Summary top ten em peat
+  Empeat_chg <- as.data.frame(Cb_chg[order(-Cb_chg$EmPeatTot),])
+  Empeat_chg$CHG_CODE<-as.factor(toupper(abbreviate(Empeat_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  Empeat_chg$ID1<-Empeat_chg$ID2<-Empeat_chg$IDC<-NULL
+  Empeat_chg_top<-head(Empeat_chg, n=10)
+  Empeat_chg_top$LC_t1<-Empeat_chg_top$LC_t2<-NULL
+  
+  # Summary top ten Tot_Em
+  Tot_Em_chg <- as.data.frame(Cb_chg[order(-Cb_chg$Tot_Em),])
+  Tot_Em_chg$CHG_CODE<-as.factor(toupper(abbreviate(Tot_Em_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  Tot_Em_chg$ID1<-Tot_Em_chg$ID2<-Tot_Em_chg$IDC<-NULL
+  Tot_Em_chg_top<-head(Tot_Em_chg, n=10)
+  Tot_Em_chg_top$LC_t1<-Tot_Em_chg_top$LC_t2<-NULL
+  
+  # Summary top ten Nett_Em
+  Nett_Em_chg <- as.data.frame(Cb_chg[order(-Cb_chg$Nett_Em),])
+  Nett_Em_chg$CHG_CODE<-as.factor(toupper(abbreviate(Nett_Em_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  Nett_Em_chg$ID1<-Nett_Em_chg$ID2<-Nett_Em_chg$IDC<-NULL
+  Nett_Em_chg_top<-head(Nett_Em_chg, n=10)
+  Nett_Em_chg_top$LC_t1<-Nett_Em_chg_top$LC_t2<-NULL
+  
+  # Summary top ten Nett_Em_Seq
+  Nett_Em_Seq_chg <- as.data.frame(Cb_chg[order(Cb_chg$Nett_Em),])
+  Nett_Em_Seq_chg$CHG_CODE<-as.factor(toupper(abbreviate(Nett_Em_Seq_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  Nett_Em_Seq_chg$ID1<-Nett_Em_Seq_chg$ID2<-Nett_Em_Seq_chg$IDC<-NULL
+  Nett_Em_Seq_chg_top<-head(Nett_Em_Seq_chg, n=10)
+  Nett_Em_Seq_chg_top$LC_t1<-Nett_Em_Seq_chg_top$LC_t2<-NULL
+  
+  write.table(Sq_chg_top, file = paste0("Perubahan_Seq_Tertinggi_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Em_chg_top, file = paste0("Perubahan_Em_Mineral_Tertinggi_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Empeat_chg_top, file = paste0("Perubahan_Em_Peat_Tertinggi_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Tot_Em_chg_top, file = paste0("Perubahan_Em_Total_Tertinggi_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Nett_Em_chg_top, file = paste0("Perubahan_Nett_Em_Total_Tertinggi_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Nett_Em_Seq_chg_top, file = paste0("Perubahan_Nett_Em_Seq_Total_Tertinggi_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  
+  # Summary top per planning unit
+  Seq_chg_zonal<-as.data.frame(NULL)
+  Tot_Em_chg_zonal<-as.data.frame(NULL)
+  Nett_Em_chg_zonal<-as.data.frame(NULL)
+  Nett_Em_Seq_chg_zonal<-as.data.frame(NULL)
+  
+  for(ui in 1:length(lookup_z$ID_Z)){
+    tryCatch({
+      xf<-(lookup_z$ID_Z)[ui]
+      #top ten Seq per planning unit
+      Seq_chg_z<-Cb_chg
+      Seq_chg_z<-as.data.frame(Seq_chg_z[which(Seq_chg_z$ID_Z == xf),])
+      Seq_chg_z<-aggregate(Seq~ZONE+LU_CHG+ID_Z,data=Seq_chg_z,FUN=sum)
+      Seq_chg_z$CHG_CODE<-as.factor(toupper(abbreviate(Seq_chg_z$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Seq_chg_z<-Seq_chg_z[order(-Seq_chg_z$Seq),]
+      Seq_chg_z<-Seq_chg_z[c(1,2,4,3)]
+      Seq_chg_z_10<-head(Seq_chg_z,n=10)
+      Seq_chg_zonal<-rbind(Seq_chg_zonal,Seq_chg_z_10)
+      #top ten Tot_Em per planning unit
+      Tot_Em_chg_z<-Cb_chg
+      Tot_Em_chg_z<-as.data.frame(Tot_Em_chg_z[which(Tot_Em_chg_z$ID_Z == xf),])
+      Tot_Em_chg_z<-aggregate(Tot_Em~ZONE+LU_CHG+ID_Z,data=Tot_Em_chg_z,FUN=sum)
+      Tot_Em_chg_z$CHG_CODE<-as.factor(toupper(abbreviate(Tot_Em_chg_z$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Tot_Em_chg_z<-Tot_Em_chg_z[order(-Tot_Em_chg_z$Tot_Em),]
+      Tot_Em_chg_z<-Tot_Em_chg_z[c(1,2,4,3)]
+      Tot_Em_chg_z_10<-head(Tot_Em_chg_z,n=10)
+      Tot_Em_chg_zonal<-rbind(Tot_Em_chg_zonal,Tot_Em_chg_z_10)
+      #top ten Nett_Em per planning unit
+      Nett_Em_chg_z<-Cb_chg
+      Nett_Em_chg_z<-as.data.frame(Nett_Em_chg_z[which(Nett_Em_chg_z$ID_Z == xf),])
+      Nett_Em_chg_z<-aggregate(Nett_Em~ZONE+LU_CHG+ID_Z,data=Nett_Em_chg_z,FUN=sum)
+      Nett_Em_chg_z$CHG_CODE<-as.factor(toupper(abbreviate(Nett_Em_chg_z$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Nett_Em_chg_z<-Nett_Em_chg_z[order(-Nett_Em_chg_z$Nett_Em),]
+      Nett_Em_chg_z<-Nett_Em_chg_z[c(1,2,4,3)]
+      Nett_Em_chg_z_10<-head(Nett_Em_chg_z,n=10)
+      Nett_Em_chg_zonal<-rbind(Nett_Em_chg_zonal,Nett_Em_chg_z_10)
+      #top ten Nett_Em_Seq per planning unit
+      Nett_Em_Seq_chg_z<-Cb_chg
+      Nett_Em_Seq_chg_z<-as.data.frame(Nett_Em_Seq_chg_z[which(Nett_Em_Seq_chg_z$ID_Z == xf),])
+      Nett_Em_Seq_chg_z<-aggregate(Nett_Em~ZONE+LU_CHG+ID_Z,data=Nett_Em_Seq_chg_z,FUN=sum)
+      Nett_Em_Seq_chg_z$CHG_CODE<-as.factor(toupper(abbreviate(Nett_Em_Seq_chg_z$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Nett_Em_Seq_chg_z<-Nett_Em_Seq_chg_z[order(Nett_Em_Seq_chg_z$Nett_Em),]
+      Nett_Em_Seq_chg_z<-Nett_Em_Seq_chg_z[c(1,2,4,3)]
+      Nett_Em_Seq_chg_z_10<-head(Nett_Em_Seq_chg_z,n=10)
+      Nett_Em_Seq_chg_zonal<-rbind(Nett_Em_Seq_chg_zonal,Nett_Em_Seq_chg_z_10)
+    },error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+  }
+  write.table(Seq_chg_zonal, file = paste0("Seq_Zone_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Tot_Em_chg_zonal, file = paste0("Tot_Em_Zone_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Nett_Em_chg_zonal, file = paste0("Nett_Em_Zone_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Nett_Em_Seq_chg_zonal, file = paste0("Nett_Em_Seq_Zone_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+
+  # Summary top per admin
+  Seq_chg_admin<-as.data.frame(NULL)
+  Tot_Em_chg_admin<-as.data.frame(NULL)
+  Nett_Em_chg_admin<-as.data.frame(NULL)
+  Nett_Em_Seq_chg_admin<-as.data.frame(NULL)
+  
+  for(uj in 1:length(lut_ref$IDADM)){
+    tryCatch({
+      xg<-(lut_ref$IDADM)[uj]
+      #top ten Seq per admin
+      Seq_chg_a<-Cb_chg
+      Seq_chg_a<-as.data.frame(Seq_chg_a[which(Seq_chg_a$IDADM == xg),])
+      Seq_chg_a<-aggregate(Seq~ZONE+LU_CHG+IDADM,data=Seq_chg_a,FUN=sum)
+      Seq_chg_a$CHG_CODE<-as.factor(toupper(abbreviate(Seq_chg_a$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Seq_chg_a<-Seq_chg_a[order(-Seq_chg_a$Seq),]
+      Seq_chg_a<-Seq_chg_a[c(1,2,4,3)]
+      Seq_chg_a_10<-head(Seq_chg_a,n=10)
+      Seq_chg_admin<-rbind(Seq_chg_admin,Seq_chg_a_10)
+      #top ten Tot_Em per admin
+      Tot_Em_chg_a<-Cb_chg
+      Tot_Em_chg_a<-as.data.frame(Tot_Em_chg_a[which(Tot_Em_chg_a$IDADM == xg),])
+      Tot_Em_chg_a<-aggregate(Tot_Em~ZONE+LU_CHG+IDADM,data=Tot_Em_chg_a,FUN=sum)
+      Tot_Em_chg_a$CHG_CODE<-as.factor(toupper(abbreviate(Tot_Em_chg_a$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Tot_Em_chg_a<-Tot_Em_chg_a[order(-Tot_Em_chg_a$Tot_Em),]
+      Tot_Em_chg_a<-Tot_Em_chg_a[c(1,2,4,3)]
+      Tot_Em_chg_a_10<-head(Tot_Em_chg_a,n=10)
+      Tot_Em_chg_admin<-rbind(Tot_Em_chg_admin,Tot_Em_chg_a_10)
+      #top ten Nett_Em per admin
+      Nett_Em_chg_a<-Cb_chg
+      Nett_Em_chg_a<-as.data.frame(Nett_Em_chg_a[which(Nett_Em_chg_a$IDADM == xg),])
+      Nett_Em_chg_a<-aggregate(Nett_Em~ZONE+LU_CHG+IDADM,data=Nett_Em_chg_a,FUN=sum)
+      Nett_Em_chg_a$CHG_CODE<-as.factor(toupper(abbreviate(Nett_Em_chg_a$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Nett_Em_chg_a<-Nett_Em_chg_a[order(-Nett_Em_chg_a$Nett_Em),]
+      Nett_Em_chg_a<-Nett_Em_chg_a[c(1,2,4,3)]
+      Nett_Em_chg_a_10<-head(Nett_Em_chg_a,n=10)
+      Nett_Em_chg_admin<-rbind(Nett_Em_chg_admin,Nett_Em_chg_a_10)
+      #top ten Nett_Em_Seq per admin
+      Nett_Em_Seq_chg_a<-Cb_chg
+      Nett_Em_Seq_chg_a<-as.data.frame(Nett_Em_Seq_chg_a[which(Nett_Em_Seq_chg_a$IDADM == xg),])
+      Nett_Em_Seq_chg_a<-aggregate(Nett_Em~ZONE+LU_CHG+IDADM,data=Nett_Em_Seq_chg_a,FUN=sum)
+      Nett_Em_Seq_chg_a$CHG_CODE<-as.factor(toupper(abbreviate(Nett_Em_Seq_chg_a$LU_CHG, minlength=5, strict=FALSE, method="both")))
+      Nett_Em_Seq_chg_a<-Nett_Em_Seq_chg_a[order(Nett_Em_Seq_chg_a$Nett_Em),]
+      Nett_Em_Seq_chg_a<-Nett_Em_Seq_chg_a[c(1,2,4,3)]
+      Nett_Em_Seq_chg_a_10<-head(Nett_Em_Seq_chg_a,n=10)
+      Nett_Em_Seq_chg_admin<-rbind(Nett_Em_Seq_chg_admin,Nett_Em_Seq_chg_a_10)
+    },error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+  }
+  
+  # Generate thematics table
+  write.table(Seq_chg_admin, file = paste0("Seq_admin_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Tot_Em_chg_admin, file = paste0("Tot_Em_admin_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Nett_Em_chg_admin, file = paste0("Nett_Em_admin_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  write.table(Nett_Em_Seq_chg_admin, file = paste0("Nett_Em_Seq_admin_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
   
   # Summarize calculation result following the template: Period; Gross Em; Seq; Nett abg em; peat em; Total em. Store as .csv
   if(ts == 1) {
-    summary_table <- data.frame(PERIOD = paste0(ti1, "-", ti2), G_Em = sum(fr_chMap$Em_co2Eq), Seq = sum(fr_chMap$Seq), P_Em = sum(fr_chMap$EmPeatTot), stringsAsFactors = FALSE)
+    summary_table <- data.frame(PERIOD = paste0(ti1, "-", ti2), Count_area = sum(fr_chMap$count), G_Em = sum(fr_chMap$Em_co2Eq), Seq = sum(fr_chMap$Seq), P_Em = sum(fr_chMap$EmPeatTot), stringsAsFactors = FALSE)
+    summary_table$NettAll <- summary_table$G_Em - summary_table$Seq + summary_table$P_Em
+    summary_table$G_Em_per_Ha_yr <- summary_table$G_Em / d_ti / summary_table$Count_area
+    summary_table$Seq_per_Ha_yr <- summary_table$Seq / d_ti / summary_table$Count_area
+    summary_table$P_Em_per_Ha_yr <- summary_table$P_Em / d_ti / summary_table$Count_area
+    summary_table$NettAll_per_Ha_yr <- summary_table$NettAll / d_ti / summary_table$Count_area
   } else {
-    summary_add <- data.frame(PERIOD = paste0(ti1, "-", ti2), G_Em = sum(fr_chMap$Em_co2Eq), Seq = sum(fr_chMap$Seq), P_Em = sum(fr_chMap$EmPeatTot), stringsAsFactors = FALSE)
+    summary_add <- data.frame(PERIOD = paste0(ti1, "-", ti2), Count_area = sum(fr_chMap$count), G_Em = sum(fr_chMap$Em_co2Eq), Seq = sum(fr_chMap$Seq), P_Em = sum(fr_chMap$EmPeatTot), stringsAsFactors = FALSE)
     summary_add$NettAll <- summary_add$G_Em - summary_add$Seq + summary_add$P_Em
+    summary_add$G_Em_per_Ha_yr <- summary_add$G_Em / d_ti / summary_add$Count_area
+    summary_add$Seq_per_Ha_yr <- summary_add$Seq / d_ti / summary_add$Count_area
+    summary_add$P_Em_per_Ha_yr <- summary_add$P_Em / d_ti / summary_add$Count_area
+    summary_add$NettAll_per_Ha_yr <- summary_add$NettAll / d_ti / summary_add$Count_area
     summary_table <- data.frame(rbind(summary_table, summary_add), stringsAsFactors = FALSE)
   }
+  
+  # Generate QUES_C map
+  Em_Mineral_map <- reclassify(ch_map, carb_compile_period_sel[, c("value", "Em_co2Eq")])
+  writeRaster(Em_Mineral_map, paste0("Em_Mineral_map_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
+  Seq_map <- reclassify(ch_map, carb_compile_period_sel[, c("value", "Seq")])
+  writeRaster(Seq_map, paste0("Seq_map_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
+  Em_Peat_map <- reclassify(ch_map, carb_compile_period_sel[, c("value", "EmPeatTot")])
+  writeRaster(Em_Peat_map, paste0("Em_Peat_map_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
+  Total_Em_map <- reclassify(ch_map, carb_compile_period_sel[, c("value", "Tot_Em")])
+  writeRaster(Total_Em_map, paste0("Total_Em_map_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
+  Nett_Em_map <- reclassify(ch_map, carb_compile_period_sel[, c("value", "Nett_Em")])
+  writeRaster(Nett_Em_map, paste0("Nett_Em_map_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
   
   # SumTab \ends----
   if(ts == (length(num_of_chgmap))){
     summary_table$NettAll <- summary_table$G_Em - summary_table$Seq + summary_table$P_Em
   }
+  
+  # Produce figure Nett Emission
+  location="Kota Sungai Penuh"
+  colnames(Nett_Em_chg_a_10)[3]<-"Nett_Em"
+  Largest_Nett_Em.chg_a<- ggplot(Nett_Em_chg_a_10, aes(x=reorder(LU_CHG, -Nett_Em),y=Nett_Em, fill=LU_CHG))+geom_bar(stat='identity',position='dodge')+
+    geom_text(data=Nett_Em_chg_a_10, aes(x=LU_CHG, y=Nett_Em, label=round(Nett_Em, 1)),size=3, vjust=0.1) +
+    ggtitle(paste("10 emisi bersih tertinggi", location, ti1,"-",ti2 )) +
+    labs(x = 'Emisi bersih', y='Ton_CO2eq') + guides(fill=FALSE)+
+    theme(plot.title = element_text(lineheight= 5, face="bold")) + scale_y_continuous() +
+    theme(axis.title.x=element_blank(), axis.text.x = element_text(size=8),
+          panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+
   working_directory<-paste0("F:/GGP/Jambi/Result/QUESC/")
   setwd(working_directory)
 }
 
-# Extract table
+# Generate summary table
 write.table(summary_table, file = paste0('summary_emission.csv'), sep = ",", row.names = FALSE)
 write.table(carb_compile, file = paste0('emission_LCdynamics.csv'), sep = ",", row.names = FALSE)
 
@@ -410,5 +575,5 @@ write.table(carb_compile, file = paste0('emission_LCdynamics.csv'), sep = ",", r
 # print(QUES_C_ppt, target=paste0(result_dir, "/QUES_C_ppt_chart1.pptx"))
 
 # Save project file
-proj.file<-paste(working_directory, "QUES_C.lpj", sep="")
-save.image(file = proj.file)
+# proj.file<-paste(working_directory, "QUES_C.lpj", sep="")
+# save.image(file = proj.file)
