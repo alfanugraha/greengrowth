@@ -29,11 +29,9 @@ library(tidyverse)
 library(mschart)
 library(officer)
 
-<<<<<<< HEAD
 # PreQUES # QUES_C process should be refer from PreQUES result ####
-=======
+
 ## PreQUES (NOT TO BE COMPILED! FOR TESTING PURPOSE ONLY)####################################################################################################################################################
->>>>>>> 1895fe47ec1f097df669d8fcf71d9ecae7a9ef38
 
 ## define initial file
 working_directory="F:/GGP/Jambi/Result/"
@@ -173,8 +171,7 @@ for(d in 1:(num_of_files-1)){
   # top ten dominant changes based on landuse/cover change
   chg_only_top<-head(chg_only, n=10)
   
-  
-  # summary of zonal dominant change
+    # summary of zonal dominant change
   lg_chg_zonal<-as.data.frame(NULL)
   for(l in 1:length(area_zone$ID)){
     tryCatch({
@@ -216,16 +213,23 @@ print(preques_ppt, target=paste0(working_directory, "/preques_ppt_chart2.pptx"))
 proj.file<-paste(working_directory, "PreQUES.lpj", sep="")
 save.image(file = proj.file)
 
+
 # QUES_C ####
+
 # Setting up basic database parameters ####
 # select the .lpj based on which the project shall be executed
 proj.file <- "F:/GGP/Jambi/Result/PreQUES.lpj"
 load(proj.file)
 idx_QUES_C<-1 # # ADreview: idx shall be retreived from the proj.file and then added by 1 as the process runs
 
-## define initial file
+## Define initial file
 cstock="F:/GGP/jambi/table/c_stock.csv"
 em_peat="F:/GGP/jambi/table/faktor_emisi_peat.csv"
+
+# Set result directory
+result_dir<-paste0("F:/GGP/Jambi/Result/QUESC/")
+dir.create(result_dir)
+setwd(result_dir)
 
 # To retrieve ref data
 Adm="F:/GGP/jambi/raster/Adm/Jambi_kab.tif"
@@ -258,24 +262,24 @@ num_of_chgmap <- length(list_of_chgmap)
 # LOOPING FRAMEWORK FOR EACH TIMESTEP====
 for(ts in 1: (num_of_chgmap)){
   
-  # setting periode for QUES_C
+  # Setting periode for QUES_C
   T1<-as.numeric(substr(list_of_files[ts], 3, 6))
   T2<-as.numeric(substr(list_of_files[ts+1], 3, 6))
 
-  # eval(parse(text=(paste(list_of_chgmap, overwrite=TRUE, sep=""))))
+  # Eval(parse(text=(paste(list_of_chgmap, overwrite=TRUE, sep=""))))
   ti1<-as.numeric(substr(list_of_files[ts], 3, 6))
   ti2<-as.numeric(substr(list_of_files[ts+1], 3, 6))
   d_ti <- ti2-ti1 # delta year
   
-  # combine with admin data
+  # Combine with admin data
   chg_map<- paste0("F:/GGP/Jambi/raster/Chgmap/", list_of_chgmap[ts])
   chg_map<- raster(chg_map)
   ch_map <- ref+chg_map
   
-  # retrieve freq
+  # Retrieve freq
   fr_chMap <- data.frame(freq(ch_map, useNA = "no"), stringsAsFactors= FALSE)
   
-  # disaggregate using substr # note that the result will be presented as character. Do convert into numeric
+  # Disaggregate using substr # note that the result will be presented as character. Do convert into numeric
   fr_chMap$IDADM <- floor(fr_chMap$value / 10^6)
   fr_chMap$ID_Z <- fr_chMap$value%%10^2
   fr_chMap$ID_T1 <- floor(fr_chMap$value%%10^4/10^2)
@@ -284,7 +288,7 @@ for(ts in 1: (num_of_chgmap)){
   # Define new 'hectare' column
   fr_chMap <- fr_chMap %>% mutate(hectares = count* res(ref)[1]^2/10000)
   
-  # carbon merge t1-t2
+  # Carbon merge t1-t2
   for(w in 1:2){
     if(w ==1) orNames <- names(cstock)
     names(cstock)[1] <-paste0("ID_T", w)
@@ -294,29 +298,29 @@ for(ts in 1: (num_of_chgmap)){
     if(w ==2) names(cstock) <- orNames
   }
   
-  # calculate emission
+  # Calculate emission
   fr_chMap$Em_co2Eq <- (fr_chMap$c_1 - fr_chMap$c_2)*fr_chMap$count*res(ref)[1]^2/10000 * 3.67
   fr_chMap$Seq <- 0
   fr_chMap[fr_chMap$Em_co2Eq < 0, "Seq"] <- -1* fr_chMap[fr_chMap$Em_co2Eq < 0, "Em_co2Eq"]
   fr_chMap[fr_chMap$Seq > 0, "Em_co2Eq"] <- 0 # correcting negative emission
   
-  # peat_em merge t1-t2
+  # Peat_em merge t1-t2
   rec_table <- fr_chMap[, c("value", "Em_co2Eq", "Seq", "count")]
   rec_table$Em_px <- rec_table$Em_co2Eq/rec_table$count
   rec_table$Seq_px <- rec_table$Seq/rec_table$count
   
   # QUES_C dir
-  result_dir<-paste0("F:/GGP/Jambi/Result/QUESC_", ti1, "_",  ti2)
+  result_dir<-paste0("F:/GGP/Jambi/Result/QUESC/QUESC_", ti1, "_",  ti2)
   dir.create(result_dir)
   setwd(result_dir)
   
-  # generate emission and sequestration map
+  # Generate emission and sequestration map
   em_map <- reclassify(ch_map, rec_table[, c("value", "Em_px")])
   writeRaster(em_map, paste0("Em_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
   seq_map <- reclassify(ch_map, rec_table[, c("value", "Seq_px")])
   writeRaster(seq_map, paste0("Seq_", ti1, "_", ti2, ".tif"), overwrite =TRUE)
   
-  # peat_puID contains numbers which stand for id of pu containing peat
+  # Peat_puID contains numbers which stand for id of pu containing peat
   for(w in 1:2){
     em_peatMod <- em_peat[, c(1, 3)]
     em_peatMod[, 2] <- em_peatMod[, 2]*d_ti/2
@@ -325,23 +329,57 @@ for(ts in 1: (num_of_chgmap)){
     fr_chMap <- merge(fr_chMap, em_peatMod, by= paste0("ID_T", w), all.x = TRUE)
   }
   
-  # correction for peat_em which falls in non-peat planning unit (*0)
+  # Correction for peat_em which falls in non-peat planning unit (*0)
   fr_chMap[which(!fr_chMap$ID_Z %in% peat_puID), c("EmPeat_1", "EmPeat_2")] <- fr_chMap[which(!fr_chMap$ID_Z %in% peat_puID), c("EmPeat_1", "EmPeat_2")]*0
   
-  # calculate total peat_em
+  # Calculate total peat_em
   fr_chMap[, c("EmPeat_1", "EmPeat_2")] <- fr_chMap[, c("EmPeat_1", "EmPeat_2")]*fr_chMap[, "count"]* res(ref)[1]^2/10000 # conversion factor to hectare
   fr_chMap$EmPeatTot <- fr_chMap$EmPeat_1 + fr_chMap$EmPeat_2
   
-  # legend merge using lookup tables: pu, admin
+  # Legend merge using lookup tables: pu, admin
   fr_chMap <- merge(fr_chMap, lut_ref, by = "IDADM", all.x = TRUE)
   colnames(lookup_z) = c("ID_Z", "ZONE")
   fr_chMap <- merge(fr_chMap, lookup_z, by = "ID_Z", all.x =TRUE)
   
-  # add period annotation
+  # Add period annotation
   fr_chMap$PERIOD <- paste0(ti1, "-", ti2)
   
-  # store at master table, in .csv, rbind with previous runs
+  # Store at master table, in .csv, rbind with previous runs
   if(ts == 1) carb_compile <- fr_chMap else carb_compile <- data.frame(rbind(carb_compile, fr_chMap), stringsAsFactors = FALSE)
+ 
+  # Extract carbon compile per period
+  carb_compile_period <- data.frame(fr_chMap, stringsAsFactors = FALSE)
+  write.table(carb_compile_period, file = paste0("emission_LCdynamics_", ti1, "_", ti2, ".csv"), sep = ",", row.names = FALSE)
+  
+  # Top seq-em changes process
+  carb_compile_period_sel <- carb_compile_period[ which(carb_compile_period$count > 0),]
+  carb_compile_period_sel$LU_CHG <- do.call(paste, c(carb_compile_period_sel[c("LC_1", "LC_2")], sep = " to "))
+  cb_chg <- carb_compile_period_sel
+  cb_chg$ID1<-as.numeric(as.character((cb_chg$ID_T1)))
+  cb_chg$ID2<-as.numeric(as.character((cb_chg$ID_T2)))
+  cb_chg$IDC<-cb_chg$ID_T1-cb_chg$ID_T2
+  cb_chg<-cb_chg[ which(cb_chg$IDC!=0),]
+  
+  # top ten seq
+  sq_chg <- as.data.frame(cb_chg[order(-cb_chg$Seq),])
+  sq_chg$CHG_CODE<-as.factor(toupper(abbreviate(sq_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  sq_chg$ID1<-sq_chg$ID2<-sq_chg$IDC<-NULL
+  sq_chg_top<-head(sq_chg, n=10)
+  sq_chg_top$LC_t1<-sq_chg_top$LC_t2<-NULL
+  
+  # top ten em mineral  
+  em_chg <- as.data.frame(cb_chg[order(-cb_chg$Em_co2Eq),])
+  em_chg$CHG_CODE<-as.factor(toupper(abbreviate(em_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  em_chg$ID1<-em_chg$ID2<-em_chg$IDC<-NULL
+  em_chg_top<-head(em_chg, n=10)
+  em_chg_top$LC_t1<-em_chg_top$LC_t2<-NULL  
+  
+  # top ten em peat
+  empeat_chg <- as.data.frame(cb_chg[order(-cb_chg$EmPeatTot),])
+  empeat_chg$CHG_CODE<-as.factor(toupper(abbreviate(empeat_chg$LU_CHG, minlength=5, strict=FALSE, method="both")))
+  empeat_chg$ID1<-empeat_chg$ID2<-empeat_chg$IDC<-NULL
+  empeat_chg_top<-head(empeat_chg, n=10)
+  empeat_chg_top$LC_t1<-empeat_chg_top$LC_t2<-NULL
   
   # Summarize calculation result following the template: Period; Gross Em; Seq; Nett abg em; peat em; Total em. Store as .csv
   if(ts == 1) {
@@ -356,6 +394,7 @@ for(ts in 1: (num_of_chgmap)){
   if(ts == (length(num_of_chgmap))){
     summary_table$NettAll <- summary_table$G_Em - summary_table$Seq + summary_table$P_Em
   }
+  working_directory<-paste0("F:/GGP/Jambi/Result/QUESC/")
   setwd(working_directory)
 }
 
@@ -370,6 +409,6 @@ write.table(carb_compile, file = paste0('emission_LCdynamics.csv'), sep = ",", r
 # ph_with_chart(QUES_C_ppt, em_test)
 # print(QUES_C_ppt, target=paste0(result_dir, "/QUES_C_ppt_chart1.pptx"))
 
-#save project file
+# Save project file
 proj.file<-paste(working_directory, "QUES_C.lpj", sep="")
 save.image(file = proj.file)
