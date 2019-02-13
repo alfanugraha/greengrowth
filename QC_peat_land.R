@@ -28,6 +28,7 @@ library(zoo)
 library(tidyverse)
 library(mschart)
 library(officer)
+library(ggpubr)
 
 # PreQUES # QUES_C process should be refer from PreQUES result ####
 
@@ -558,6 +559,8 @@ for(ts in 1: (num_of_chgmap)){
     theme(plot.title = element_text(lineheight= 5, face="bold")) + scale_y_continuous() +
     theme(axis.title.x=element_blank(), axis.text.x = element_text(size=8),
           panel.grid.major=element_blank(), panel.grid.minor=element_blank())
+  
+  # Largest_Nett_Em.chg_a1 <- ggplot(data = Nett_Em_chg_a_10, aes(x=Nett_Em, col=LU_CHG))+geom_freqpoly(size=1, bins=60)
 
   working_directory<-paste0("F:/GGP/Jambi/Result/QUESC/")
   setwd(working_directory)
@@ -567,12 +570,36 @@ for(ts in 1: (num_of_chgmap)){
 write.table(summary_table, file = paste0('summary_emission.csv'), sep = ",", row.names = FALSE)
 write.table(carb_compile, file = paste0('emission_LCdynamics.csv'), sep = ",", row.names = FALSE)
 
+#Pie chart mineral vs peat
+Sum_mineral_peat <- subset(summary_table, select=c(G_Em, P_Em))
+Sum_mineral_peat$Mineral_Percent <- Sum_mineral_peat$G_Em/(Sum_mineral_peat$P_Em+Sum_mineral_peat$G_Em)*100
+Sum_mineral_peat$Peat_Percent <- Sum_mineral_peat$P_Em/(Sum_mineral_peat$P_Em+Sum_mineral_peat$G_Em)*100
+Sum_mineral_peat <- subset(Sum_mineral_peat, select=c(Mineral_Percent, Peat_Percent))
+Sum_mineral_peat <- as.data.frame(t(Sum_mineral_peat))
+Sum_mineral_peat <- data.frame(Soil= row.names(Sum_mineral_peat), Sum_mineral_peat, row.names=NULL)
+pie_minpeat_X1 <- ggpie(Sum_mineral_peat, "X1", label = 'X1', fill = "Soil", palette=brewer.pal(n=8, name = 'Set2'), 
+                        color = 'white', lab.pos = 'in', lab.font = 'white')
+pie_minpeat_X2 <- ggpie(Sum_mineral_peat, "X2", label = 'X2', fill = "Soil", palette=brewer.pal(n=8, name = 'Set1'), 
+                        color = 'white', lab.pos = 'in', lab.font = 'white')
+pie_minpeat_X3 <- ggpie(Sum_mineral_peat, "X3", label = 'X3', fill = "Soil", palette=brewer.pal(n=8, name = 'Set3'), 
+                        color = 'white', lab.pos = 'in', lab.font = 'white')
+pie_minpeat_X4 <- ggpie(Sum_mineral_peat, "X4", label = 'X4', fill = "Soil", palette=brewer.pal(n=8, name = 'Dark2'), 
+                        color = 'white', lab.pos = 'in', lab.font = 'white')
+pie_minpeat_X5 <- ggpie(Sum_mineral_peat, "X5", label = 'X5', fill = "Soil", palette=brewer.pal(n=3, name = 'Set1'), 
+                        color = 'white', lab.pos = 'in', lab.font = 'white')
+
 # Print ppt
+
 # QUES_C_ppt <- read_pptx()
-# em_test <- ms_barchart(data = fr_chMap, x = "ZONE", y = "COUNT")
 # QUES_C_ppt <- add_slide(QUES_C_ppt, layout = "Title and Content", master = "Office Theme")
-# ph_with_chart(QUES_C_ppt, em_test)
-# print(QUES_C_ppt, target=paste0(result_dir, "/QUES_C_ppt_chart1.pptx"))
+# ph_with_text(QUES_C_ppt, type = "title", str = "Mineral and Peat")
+# QUES_C_ppt <- add_slide(QUES_C_ppt, layout = "Title and Content", master = "Office Theme")
+# ph_with_table(QUES_C_ppt, value = head(mtcars), left = 1, top = 3, height = 7, width = 7 )
+# pie_min_peat <- ms_barchart(data = Sum_mineral_peat, x="Soil", y="X1")
+# print(QUES_C_ppt, target="QUES_C_ppt_chart1.pptx")
+# QUES_C_ppt <- add_slide(QUES_C_ppt, layout = "Title and Content", master = "Office Theme")
+# ph_with_chart(QUES_C_ppt, chart = pie_min_peat, value = head(mtcars), left = 1, top = 3, height = 7, width = 7 )
+# print(QUES_C_ppt, target="QUES_C_ppt_chart1.pptx")
 
 # Save project file
 # proj.file<-paste(working_directory, "QUES_C.lpj", sep="")
