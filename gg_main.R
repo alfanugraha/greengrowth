@@ -1,5 +1,19 @@
+#######################################################################
+## gg_main.R                                                          #
+## ------------------                                                 #
+## Date              : February, 2019                                 #
+## Author            : Alfa Nugraha                                   #
+## Script purpose    :                                                #                 
+##                                                                    #                                             
+##                                                                    #
+##                                                                    #
+##                                                                    #
+##                                                                    #
+#######################################################################
+
 source('gg_libraries.R')
 source('gg_input.R')
+source('gg_functions.R')
 
 source('gg_lulcc.R')
 source('gg_carbon.R')
