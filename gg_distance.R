@@ -40,46 +40,94 @@ ggChangesDatabase$value_temp <- NULL
 colnames(ggChangesDatabase) = c('ID_CHG', 'COUNT', 'ID_LC1', 'ID_LC2')
 writeRaster(ggChangeMap, paste0(lusimSimulation, '/changeMap_', ggInitialYear, '_', ggFinalYear, '.tif'))
 
-# reclassify
+lusimLookupLC$CLS <- 1
+lusimMaskData <- reclassify(ggLanduse1, lusimLookupLC[, c("ID", "CLS")])
+
 # !24 -> 24 d_conv_infrastructure
-ggChangesDatabase <- within(ggChangesDatabase, { d_conv_infrastructure <- ifelse(ID_LC1 != 24 & ID_LC2 == 24, ID_CHG, NA) })
-ggDistanceToInfrastructure <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_infrastructure")])
-writeRaster(ggDistanceToInfrastructure, paste0(lusimSimulation, '/d_conv_infrastructure_', ggInitialYear, '_', ggFinalYear, '.tif'))  
+# reclassify
+ggChangesDatabase <- within(ggChangesDatabase, { d_conv_infrastructure <- ifelse(ID_LC1 != 24 & ID_LC2 == 24, 1, NA) })
+lusimDistanceToInfrastructure <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_infrastructure")])
+lusimDistanceToInfrastructureFile <- paste0(lusimSimulation, '/d_conv_infrastructure_', ggInitialYear, '_', ggFinalYear, '.tif')
+# create distance
+lusimDistanceToInfrastructureTemp <- proximity(lusimDistanceToInfrastructure, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToInfrastructureTemp <- spatial_sync_raster(lusimDistanceToInfrastructureTemp, ggZone, method="ngb")
+lusimDistanceToInfrastructureTemp <- lusimDistanceToInfrastructureTemp * lusimMaskData
+writeRaster(lusimDistanceToInfrastructureTemp, lusimDistanceToInfrastructureFile) 
+rm(lusimDistanceToInfrastructureTemp)
 
 # !8 -> 8 d_conv_pulp
-ggChangesDatabase <- within(ggChangesDatabase, { d_conv_pulp <- ifelse(ID_LC1 != 8 & ID_LC2 == 8, ID_CHG, NA) })
-ggDistanceToPulp <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_pulp")])
-writeRaster(ggDistanceToPulp, paste0(lusimSimulation, '/d_conv_pulp_', ggInitialYear, '_', ggFinalYear, '.tif'))  
+ggChangesDatabase <- within(ggChangesDatabase, { d_conv_pulp <- ifelse(ID_LC1 != 8 & ID_LC2 == 8, 1, NA) })
+lusimDistanceToPulp <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_pulp")])
+lusimDistanceToPulpFile <- paste0(lusimSimulation, '/d_conv_pulp_', ggInitialYear, '_', ggFinalYear, '.tif')
+# create distance
+lusimDistanceToPulpTemp <- proximity(lusimDistanceToPulp, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToPulpTemp <- spatial_sync_raster(lusimDistanceToPulpTemp, ggZone, method="ngb")
+lusimDistanceToPulpTemp <- lusimDistanceToPulpTemp * lusimMaskData
+writeRaster(lusimDistanceToPulpTemp, lusimDistanceToPulpFile)  
+rm(lusimDistanceToPulpTemp)
 
 # !11,!12 -> 11, 12 d_conv_rubber
-ggChangesDatabase <- within(ggChangesDatabase, { d_conv_rubber <- ifelse((ID_LC1 !=  11 & ID_LC2 == 11) | (ID_LC1 !=  12 & ID_LC2 == 12), ID_CHG, NA) })
-ggDistanceToRubber <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_rubber")])
-writeRaster(ggDistanceToRubber, paste0(lusimSimulation, '/d_conv_rubber_', ggInitialYear, '_', ggFinalYear, '.tif'))  
+ggChangesDatabase <- within(ggChangesDatabase, { d_conv_rubber <- ifelse((ID_LC1 !=  11 & ID_LC2 == 11) | (ID_LC1 !=  12 & ID_LC2 == 12), 1, NA) })
+lusimDistanceToRubber <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_rubber")])
+lusimDistanceToRubberFile <- paste0(lusimSimulation, '/d_conv_rubber_', ggInitialYear, '_', ggFinalYear, '.tif')
+# create distance
+lusimDistanceToRubberTemp <- proximity(lusimDistanceToRubber, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToRubberTemp <- spatial_sync_raster(lusimDistanceToRubberTemp, ggZone, method="ngb")
+lusimDistanceToRubberTemp <- lusimDistanceToRubberTemp * lusimMaskData
+writeRaster(lusimDistanceToRubberTemp, lusimDistanceToRubberFile)  
+rm(lusimDistanceToRubberTemp)
 
 # !10 -> 10 d_conv_coffee
-ggChangesDatabase <- within(ggChangesDatabase, { d_conv_coffee <- ifelse(ID_LC1 != 10 & ID_LC2 == 10, ID_CHG, NA) })
-ggDistanceToCoffee <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_coffee")])
-writeRaster(ggDistanceToCoffee, paste0(lusimSimulation, '/d_conv_coffee_', ggInitialYear, '_', ggFinalYear, '.tif'))  
+ggChangesDatabase <- within(ggChangesDatabase, { d_conv_coffee <- ifelse(ID_LC1 != 10 & ID_LC2 == 10, 1, NA) })
+lusimDistanceToCoffee <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_coffee")])
+lusimDistanceToCoffeeFile <- paste0(lusimSimulation, '/d_conv_coffee_', ggInitialYear, '_', ggFinalYear, '.tif')
+# create distance
+lusimDistanceToCoffeeTemp <- proximity(lusimDistanceToCoffee, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToCoffeeTemp <- spatial_sync_raster(lusimDistanceToCoffeeTemp, ggZone, method="ngb")
+lusimDistanceToCoffeeTemp <- lusimDistanceToCoffeeTemp * lusimMaskData
+writeRaster(lusimDistanceToCoffeeTemp, lusimDistanceToCoffeeFile)  
 
 # !13 -> 13 d_conv_oilpalm
-ggChangesDatabase <- within(ggChangesDatabase, { d_conv_oilpalm <- ifelse(ID_LC1 != 13 & ID_LC2 == 13, ID_CHG, NA) })
-ggDistanceToOilPalm <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_oilpalm")])
-writeRaster(ggDistanceToOilPalm, paste0(lusimSimulation, '/d_conv_oilpalm_', ggInitialYear, '_', ggFinalYear, '.tif'))  
+ggChangesDatabase <- within(ggChangesDatabase, { d_conv_oilpalm <- ifelse(ID_LC1 != 13 & ID_LC2 == 13, 1, NA) })
+lusimDistanceToOilPalm <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_oilpalm")])
+lusimDistanceToOilPalmFile <- paste0(lusimSimulation, '/d_conv_oilpalm_', ggInitialYear, '_', ggFinalYear, '.tif')
+# create distance
+lusimDistanceToOilPalmTemp <- proximity(lusimDistanceToOilPalm, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToOilPalmTemp <- spatial_sync_raster(lusimDistanceToOilPalmTemp, ggZone, method="ngb")
+lusimDistanceToOilPalmTemp <- lusimDistanceToOilPalmTemp * lusimMaskData
+writeRaster(lusimDistanceToOilPalmTemp, lusimDistanceToOilPalmFile)  
+rm(lusimDistanceToOilPalmTemp)
 
 # !19 -> 19 d_conv_rice
-ggChangesDatabase <- within(ggChangesDatabase, { d_conv_rice <- ifelse(ID_LC1 != 19 & ID_LC2 == 19, ID_CHG, NA) })
-ggDistanceToRice <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_rice")])
-writeRaster(ggDistanceToRice, paste0(lusimSimulation, '/d_conv_rice_', ggInitialYear, '_', ggFinalYear, '.tif'))  
+ggChangesDatabase <- within(ggChangesDatabase, { d_conv_rice <- ifelse(ID_LC1 != 19 & ID_LC2 == 19, 1, NA) })
+lusimDistanceToRice <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_conv_rice")])
+lusimDistanceToRiceFile <- paste0(lusimSimulation, '/d_conv_rice_', ggInitialYear, '_', ggFinalYear, '.tif') 
+# create distance
+lusimDistanceToRiceTemp <- proximity(lusimDistanceToRice, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToRiceTemp <- spatial_sync_raster(lusimDistanceToRiceTemp, ggZone, method="ngb")
+lusimDistanceToRiceTemp <- lusimDistanceToRiceTemp * lusimMaskData
+writeRaster(lusimDistanceToRiceTemp, lusimDistanceToRiceFile)  
+rm(lusimDistanceToRiceTemp)
 
 # !1-7 -> 1-7 d_defor
-ggChangesDatabase <- within(ggChangesDatabase, { d_defor <- ifelse(!ID_LC2 %in% c(1:7) & ID_LC1 %in% c(1:7), ID_CHG, NA) })
-ggDistanceToRice <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_defor")])
-writeRaster(ggDistanceToRice, paste0(lusimSimulation, '/d_defor_', ggInitialYear, '_', ggFinalYear, '.tif'))  
-
-
-
+ggChangesDatabase <- within(ggChangesDatabase, { d_defor <- ifelse(!ID_LC2 %in% c(1:7) & ID_LC1 %in% c(1:7), 1, NA) })
+lusimDistanceToDeforestation <- reclassify(ggChangeMap, ggChangesDatabase[, c("ID_CHG", "d_defor")])
+lusimDistanceToDeforestationFile <- paste0(lusimSimulation, '/d_defor_', ggInitialYear, '_', ggFinalYear, '.tif')
 # create distance
-proximity(ggDistanceToInfrastructure, values = c(ggChangesDatabase$d_conv_infrastructure), units = 1, in_meters = FALSE, filename = NULL)
+lusimDistanceToDeforestationTemp <- proximity(lusimDistanceToDeforestation, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToDeforestationTemp <- spatial_sync_raster(lusimDistanceToDeforestationTemp, ggZone, method="ngb")
+lusimDistanceToDeforestationTemp <- lusimDistanceToDeforestationTemp * lusimMaskData
+writeRaster(lusimDistanceToDeforestationTemp, lusimDistanceToDeforestationFile)  
+rm(lusimDistanceToDeforestationTemp)
+
+
 
 
 
