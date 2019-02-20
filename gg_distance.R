@@ -54,7 +54,7 @@ lusimDistanceToInfrastructureTemp <- proximity(lusimDistanceToInfrastructure, va
 lusimDistanceToInfrastructureTemp <- spatial_sync_raster(lusimDistanceToInfrastructureTemp, ggZone, method="ngb")
 lusimDistanceToInfrastructureTemp <- lusimDistanceToInfrastructureTemp * lusimMaskData
 writeRaster(lusimDistanceToInfrastructureTemp, lusimDistanceToInfrastructureFile) 
-rm(lusimDistanceToInfrastructureTemp)
+rm(lusimDistanceToInfrastructure, lusimDistanceToInfrastructureTemp)
 
 # !8 -> 8 d_conv_pulp
 ggChangesDatabase <- within(ggChangesDatabase, { d_conv_pulp <- ifelse(ID_LC1 != 8 & ID_LC2 == 8, 1, NA) })
@@ -66,7 +66,7 @@ lusimDistanceToPulpTemp <- proximity(lusimDistanceToPulp, values = 1, in_meters 
 lusimDistanceToPulpTemp <- spatial_sync_raster(lusimDistanceToPulpTemp, ggZone, method="ngb")
 lusimDistanceToPulpTemp <- lusimDistanceToPulpTemp * lusimMaskData
 writeRaster(lusimDistanceToPulpTemp, lusimDistanceToPulpFile)  
-rm(lusimDistanceToPulpTemp)
+rm(lusimDistanceToPulp, lusimDistanceToPulpTemp)
 
 # !11,!12 -> 11, 12 d_conv_rubber
 ggChangesDatabase <- within(ggChangesDatabase, { d_conv_rubber <- ifelse((ID_LC1 !=  11 & ID_LC2 == 11) | (ID_LC1 !=  12 & ID_LC2 == 12), 1, NA) })
@@ -78,7 +78,7 @@ lusimDistanceToRubberTemp <- proximity(lusimDistanceToRubber, values = 1, in_met
 lusimDistanceToRubberTemp <- spatial_sync_raster(lusimDistanceToRubberTemp, ggZone, method="ngb")
 lusimDistanceToRubberTemp <- lusimDistanceToRubberTemp * lusimMaskData
 writeRaster(lusimDistanceToRubberTemp, lusimDistanceToRubberFile)  
-rm(lusimDistanceToRubberTemp)
+rm(lusimDistanceToRubber, lusimDistanceToRubberTemp)
 
 # !10 -> 10 d_conv_coffee
 ggChangesDatabase <- within(ggChangesDatabase, { d_conv_coffee <- ifelse(ID_LC1 != 10 & ID_LC2 == 10, 1, NA) })
@@ -90,6 +90,7 @@ lusimDistanceToCoffeeTemp <- proximity(lusimDistanceToCoffee, values = 1, in_met
 lusimDistanceToCoffeeTemp <- spatial_sync_raster(lusimDistanceToCoffeeTemp, ggZone, method="ngb")
 lusimDistanceToCoffeeTemp <- lusimDistanceToCoffeeTemp * lusimMaskData
 writeRaster(lusimDistanceToCoffeeTemp, lusimDistanceToCoffeeFile)  
+rm(lusimDistanceToCoffee, lusimDistanceToCoffeeTemp)
 
 # !13 -> 13 d_conv_oilpalm
 ggChangesDatabase <- within(ggChangesDatabase, { d_conv_oilpalm <- ifelse(ID_LC1 != 13 & ID_LC2 == 13, 1, NA) })
@@ -101,7 +102,7 @@ lusimDistanceToOilPalmTemp <- proximity(lusimDistanceToOilPalm, values = 1, in_m
 lusimDistanceToOilPalmTemp <- spatial_sync_raster(lusimDistanceToOilPalmTemp, ggZone, method="ngb")
 lusimDistanceToOilPalmTemp <- lusimDistanceToOilPalmTemp * lusimMaskData
 writeRaster(lusimDistanceToOilPalmTemp, lusimDistanceToOilPalmFile)  
-rm(lusimDistanceToOilPalmTemp)
+rm(lusimDistanceToOilPalm, lusimDistanceToOilPalmTemp)
 
 # !19 -> 19 d_conv_rice
 ggChangesDatabase <- within(ggChangesDatabase, { d_conv_rice <- ifelse(ID_LC1 != 19 & ID_LC2 == 19, 1, NA) })
@@ -113,7 +114,7 @@ lusimDistanceToRiceTemp <- proximity(lusimDistanceToRice, values = 1, in_meters 
 lusimDistanceToRiceTemp <- spatial_sync_raster(lusimDistanceToRiceTemp, ggZone, method="ngb")
 lusimDistanceToRiceTemp <- lusimDistanceToRiceTemp * lusimMaskData
 writeRaster(lusimDistanceToRiceTemp, lusimDistanceToRiceFile)  
-rm(lusimDistanceToRiceTemp)
+rm(lusimDistanceToRice, lusimDistanceToRiceTemp)
 
 # !1-7 -> 1-7 d_defor
 ggChangesDatabase <- within(ggChangesDatabase, { d_defor <- ifelse(!ID_LC2 %in% c(1:7) & ID_LC1 %in% c(1:7), 1, NA) })
@@ -125,7 +126,7 @@ lusimDistanceToDeforestationTemp <- proximity(lusimDistanceToDeforestation, valu
 lusimDistanceToDeforestationTemp <- spatial_sync_raster(lusimDistanceToDeforestationTemp, ggZone, method="ngb")
 lusimDistanceToDeforestationTemp <- lusimDistanceToDeforestationTemp * lusimMaskData
 writeRaster(lusimDistanceToDeforestationTemp, lusimDistanceToDeforestationFile)  
-rm(lusimDistanceToDeforestationTemp)
+rm(lusimDistanceToDeforestation, lusimDistanceToDeforestationTemp)
 
 
 
