@@ -1,6 +1,6 @@
 #Initial Data
 #Type R.Data
-load("D:/GGP/Jambi/Fire_modeling/GGP_Fire_Jambi/fire_modeling/qb_sdm_ot_5_fin/qb_sdm_ot_6.RData")
+load("D:/GGP/Jambi/results_summarized/Fire_modeling/GGP_Fire_Jambi/fire_modeling/qb_sdm_ot_5_fin/qb_sdm_ot_6.RData")
 
 #Input Req: data kovariat (raster) untuk detil raster bisa dicek pada script update_comp_lyr dibawah
 # raster stack

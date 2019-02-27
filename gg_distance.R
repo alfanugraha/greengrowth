@@ -43,6 +43,7 @@ writeRaster(ggChangeMap, paste0(lusimSimulation, '/changeMap_', ggInitialYear, '
 lusimLookupLC$CLS <- 1
 lusimMaskData <- reclassify(ggLanduse1, lusimLookupLC[, c("ID", "CLS")])
 
+# FOR JAMBI
 # !24 -> 24 d_conv_infrastructure
 # reclassify
 ggChangesDatabase <- within(ggChangesDatabase, { d_conv_infrastructure <- ifelse(ID_LC1 != 24 & ID_LC2 == 24, 1, NA) })
@@ -128,8 +129,66 @@ lusimDistanceToDeforestationTemp <- lusimDistanceToDeforestationTemp * lusimMask
 writeRaster(lusimDistanceToDeforestationTemp, lusimDistanceToDeforestationFile)  
 rm(lusimDistanceToDeforestation, lusimDistanceToDeforestationTemp)
 
+# FOR PAPUA
+# !8 -> 8 dis_aca
+lusimChangesDatabase <- within(lusimChangesDatabase, { dis_aca <- ifelse(ID_LC1 != 8 & ID_LC2 == 8, 1, NA) })
+lusimDistanceToAcacia <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_aca")])
+lusimDistanceToAcaciaFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_aca.tif')
+# create distance
+lusimDistanceToAcaciaTemp <- proximity(lusimDistanceToAcacia, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToAcaciaTemp <- spatial_sync_raster(lusimDistanceToAcaciaTemp, lusimZone, method="ngb")
+lusimDistanceToAcaciaTemp <- lusimDistanceToAcaciaTemp * lusimMaskData
+writeRaster(lusimDistanceToAcaciaTemp, lusimDistanceToAcaciaFile, format="GTiff", overwrite=T)  
+rm(lusimDistanceToAcacia, lusimDistanceToAcaciaTemp)
 
+# !9 -> 9 dis_rub
+lusimChangesDatabase <- within(lusimChangesDatabase, { dis_rub <- ifelse(ID_LC1 !=  9 & ID_LC2 == 9, 1, NA) })
+lusimDistanceToRubber <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_rub")])
+lusimDistanceToRubberFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_rub.tif')
+# create distance
+lusimDistanceToRubberTemp <- proximity(lusimDistanceToRubber, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToRubberTemp <- spatial_sync_raster(lusimDistanceToRubberTemp, lusimZone, method="ngb")
+lusimDistanceToRubberTemp <- lusimDistanceToRubberTemp * lusimMaskData
+writeRaster(lusimDistanceToRubberTemp, lusimDistanceToRubberFile, format="GTiff", overwrite=T)  
+rm(lusimDistanceToRubber, lusimDistanceToRubberTemp)
 
+# !10 -> 10 dis_op
+lusimChangesDatabase <- within(lusimChangesDatabase, { dis_op <- ifelse(ID_LC1 != 10 & ID_LC2 == 10, 1, NA) })
+lusimDistanceToOilPalm <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_op")])
+lusimDistanceToOilPalmFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_op.tif')
+# create distance
+lusimDistanceToOilPalmTemp <- proximity(lusimDistanceToOilPalm, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToOilPalmTemp <- spatial_sync_raster(lusimDistanceToOilPalmTemp, lusimZone, method="ngb")
+lusimDistanceToOilPalmTemp <- lusimDistanceToOilPalmTemp * lusimMaskData
+writeRaster(lusimDistanceToOilPalmTemp, lusimDistanceToOilPalmFile, format="GTiff", overwrite=T)  
+rm(lusimDistanceToOilPalm, lusimDistanceToOilPalmTemp)
+
+# !1-6 -> 1-6 dis_def
+lusimChangesDatabase <- within(lusimChangesDatabase, { dis_def <- ifelse(!ID_LC2 %in% c(1:6) & ID_LC1 %in% c(1:6), 1, NA) })
+lusimDistanceToDeforestation <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_def")])
+lusimDistanceToDeforestationFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_def.tif')
+# create distance
+lusimDistanceToDeforestationTemp <- proximity(lusimDistanceToDeforestation, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToDeforestationTemp <- spatial_sync_raster(lusimDistanceToDeforestationTemp, lusimZone, method="ngb")
+lusimDistanceToDeforestationTemp <- lusimDistanceToDeforestationTemp * lusimMaskData
+writeRaster(lusimDistanceToDeforestationTemp, lusimDistanceToDeforestationFile, format="GTiff", overwrite=T)  
+rm(lusimDistanceToDeforestation, lusimDistanceToDeforestationTemp)
+
+# 1-2, 3-4, 5-6 dis_deg
+lusimChangesDatabase <- within(lusimChangesDatabase, { dis_deg <- ifelse((ID_LC1 ==  1 & ID_LC2 == 2) | (ID_LC1 ==  3 & ID_LC2 == 4) | (ID_LC1 ==  5 & ID_LC2 == 6), 1, NA) })
+lusimDistanceToDegradation <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_deg")])
+lusimDistanceToDegradationFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_deg.tif')
+# create distance
+lusimDistanceToDegradationTemp <- proximity(lusimDistanceToDegradation, values = 1, in_meters = TRUE)
+# extract by mask
+lusimDistanceToDegradationTemp <- spatial_sync_raster(lusimDistanceToDegradationTemp, lusimZone, method="ngb")
+lusimDistanceToDegradationTemp <- lusimDistanceToDegradationTemp * lusimMaskData
+writeRaster(lusimDistanceToDegradationTemp, lusimDistanceToDegradationFile, format="GTiff", overwrite=T)  
+rm(lusimDistanceToDegradation, lusimDistanceToDegradationTemp)
 
 
 

@@ -16,7 +16,7 @@
 ##########################################################
 
 # set target paths
-ggDataDirectory = 'D:/GGP/project_dir/data/'
+ggDataDirectory = 'D:/GGP/Papua/project_dir/data/'
 ggRasterDirectory = paste0(ggDataDirectory, 'raster/')
 ggFactorDirectory = paste0(ggRasterDirectory, 'factors/')
 ggFactorCategoricalDirectory = paste0(ggFactorDirectory, 'categorical/')
@@ -24,20 +24,20 @@ ggFactorContinuousDirectory = paste0(ggFactorDirectory, 'continuous/')
 ggTableDirectory = paste0(ggDataDirectory, 'table/')
 ggVectorDirectory = paste0(ggDataDirectory, 'vector/')
 
-ggAnalyzedLocation = 'Jambi'
+ggAnalyzedLocation = 'Papua'
 
-ggInitialYear <- 2015
+ggInitialYear <- 2010
 ggFinalYear <- 2018
 ggTimeStep <- ggFinalYear-ggInitialYear
 
-lusimInitialLCFile <- paste0(ggRasterDirectory, "lc2015_NAsync.tif")
-lusimFinalLCFile <- paste0(ggRasterDirectory, "lc_GG_2018.tif")
-lusimPlanningUnitFile <- paste0(ggRasterDirectory, "plan_unit_jambi_final_f.tif")
+lusimInitialLCFile <- paste0(ggRasterDirectory, "LC10_v2.tif")
+lusimFinalLCFile <- paste0(ggRasterDirectory, "LC18_v2.tif")
+lusimPlanningUnitFile <- paste0(ggRasterDirectory, "PU_Papua_F.tif")
 
-lusimRepetition = 9
+lusimRepetition = 6
 lusimDinamicaIteration = 1
 
-lusimResultDirectory <- "D:/GGP/project_dir/process/scen_G/SCIENDO"
+lusimResultDirectory <- "D:/GGP/Papua/process/scen_H/SCIENDO"
 dir.create(lusimResultDirectory)
 lusimTransition <- paste(lusimResultDirectory,"/1_transition", sep="")
 dir.create(lusimTransition)
@@ -54,7 +54,7 @@ if (file.exists(lusimDinamicaExe)){
 # begin writing tag
 con <- xmlOutputDOM(tag="script")
 # add property
-con$addTag("property", attrs=c(key="dff.date", value="2016-Oct-17 12:02:15"))
+con$addTag("property", attrs=c(key="dff.date", value="2019-Feb-22 13:27:13"))
 con$addTag("property", attrs=c(key="dff.version", value="3.0.17.20160922"))
 
 # begin.
@@ -106,7 +106,7 @@ con$closeTag("functor")
 # add containerfunctor = ForEachRegion
 con$addTag("containerfunctor", attrs=c(name="ForEachRegion"), close=FALSE)
 con$addTag("property", attrs=c(key="dff.functor.alias", value="forEachRegion"))
-con$addTag("inputport", attrs=c(name="regions", peerid="v3"))
+con$addTag("inputport", attrs=c(name="regions", peerid="v1"))
 con$addTag("inputport", attrs=c(name="borderCells"), 0)
 con$addTag("internaloutputport", attrs=c(name="regionManager", id="v4"))
 con$addTag("internaloutputport", attrs=c(name="step", id="v5"))
@@ -114,7 +114,7 @@ con$addTag("internaloutputport", attrs=c(name="step", id="v5"))
 # add subtag functor for Landuse1
 con$addTag("functor", attrs=c(name="RegionalizeCategoricalMap"), close=FALSE)
 con$addTag("property", attrs=c(key="dff.functor.alias", value="Initial Landscape (Region)"))
-con$addTag("inputport", attrs=c(name="globalMap", peerid="v1"))
+con$addTag("inputport", attrs=c(name="globalMap", peerid="v2"))
 con$addTag("inputport", attrs=c(name="regionId", peerid="v5"))
 con$addTag("inputport", attrs=c(name="keepNonRegionCells"), ".no")
 con$addTag("inputport", attrs=c(name="regionManager", peerid="v4"))
@@ -124,7 +124,7 @@ con$closeTag("functor")
 # add subtag functor for Landuse2
 con$addTag("functor", attrs=c(name="RegionalizeCategoricalMap"), close=FALSE)
 con$addTag("property", attrs=c(key="dff.functor.alias", value="Final Landscape (Region)"))
-con$addTag("inputport", attrs=c(name="globalMap", peerid="v2"))
+con$addTag("inputport", attrs=c(name="globalMap", peerid="v3"))
 con$addTag("inputport", attrs=c(name="regionId", peerid="v5"))
 con$addTag("inputport", attrs=c(name="keepNonRegionCells"), ".no")
 con$addTag("inputport", attrs=c(name="regionManager", peerid="v4"))
@@ -147,7 +147,7 @@ con$addTag("functor", attrs=c(name="SaveTable"), close=FALSE)
 con$addTag("property", attrs=c(key="dff.functor.alias", value="saveTable567"))
 con$addTag("property", attrs=c(key="dff.functor.comment", value="Single-step transition matrix."))
 con$addTag("inputport", attrs=c(name="table", peerid="v8"))
-con$addTag("inputport", attrs=c(name="filename"), paste('"', lusimTransition, '/Single_step.csv"', sep=''))
+con$addTag("inputport", attrs=c(name="filename"), paste('"', lusimTransition, '/single_step.csv"', sep=''))
 con$addTag("inputport", attrs=c(name="suffixDigits"), 6)
 con$addTag("inputport", attrs=c(name="step", peerid="v5"))
 con$addTag("inputport", attrs=c(name="workdir"), ".none")
@@ -158,7 +158,7 @@ con$addTag("functor", attrs=c(name="SaveTable"), close=FALSE)
 con$addTag("property", attrs=c(key="dff.functor.alias", value="saveTable566"))
 con$addTag("property", attrs=c(key="dff.functor.comment", value="Multi-step transition matrix."))
 con$addTag("inputport", attrs=c(name="table", peerid="v9"))
-con$addTag("inputport", attrs=c(name="filename"), paste('"', lusimTransition, '/Multi_step.csv"', sep=''))
+con$addTag("inputport", attrs=c(name="filename"), paste('"', lusimTransition, '/multi_step.csv"', sep=''))
 con$addTag("inputport", attrs=c(name="suffixDigits"), 6)
 con$addTag("inputport", attrs=c(name="step", peerid="v5"))
 con$addTag("inputport", attrs=c(name="workdir"), ".none")
@@ -256,7 +256,7 @@ lusimWOE <- paste(lusimResultDirectory,"/3_woe", sep="")
 dir.create(lusimWOE)
 setwd(lusimWOE)
 
-lusimLookupLC <- paste0(ggTableDirectory, 'lut_lc_f.csv')
+lusimLookupLC <- paste0(ggTableDirectory, 'lut_lu.csv')
 lusimLookupLC <- read.table(lusimLookupLC, header = T, sep = ",", stringsAsFactors = F)
 
 lusimStaticVar <- data.frame(lusimAliasFactor)
@@ -440,7 +440,7 @@ con$closeTag("containerfunctor")
 # end.
 
 # write egoml
-lusimEgomlWOE <- paste(lusimWOE, "/3_woe_per_region_.egoml", sep='')
+lusimEgomlWOE <- paste(lusimWOE, "/3_woe_per_region.egoml", sep='')
 saveXML(con$value(), file=lusimEgomlWOE)
 # replace ampersand code character
 lusimEgomlWOEText <- readLines(lusimEgomlWOE)
@@ -469,7 +469,9 @@ lusimTextSkeleton3 <- gsub("2 1 1", "1 1 1", lusimTextSkeleton2)
 
 # create masking data
 lusimLookupLC$CLS <- 1
-lusimMaskData <- reclassify(lusimLanduse1, lusimLookupLC[, c("ID", "CLS")])
+lusimLanduse2 <- raster(lusimFinalLCFile)
+lusimZone <- raster(lusimPlanningUnitFile)
+lusimMaskData <- reclassify(lusimLanduse2, lusimLookupLC[, c("ID", "CLS")])
 
 for(iter in 1:lusimRepetition){
   lusimSimulationStep <- paste(lusimSimulation,"/step", iter, sep="")
@@ -579,7 +581,7 @@ for(iter in 1:lusimRepetition){
   con$addTag("functor", attrs=c(name="LoadTable"), close=FALSE)
   con$addTag("property", attrs=c(key="dff.functor.alias", value="Transition Matrix"))
   con$addTag("property", attrs=c(key="dff.functor.comment", value="Load transition matrix."))
-  con$addTag("inputport", attrs=c(name="filename"), paste('"', lusimTransition, '/Single_step.csv"', sep=''))
+  con$addTag("inputport", attrs=c(name="filename"), paste('"', lusimTransition, '/single_step.csv"', sep=''))
   con$addTag("inputport", attrs=c(name="suffixDigits"), 6)
   con$addTag("inputport", attrs=c(name="step", peerid="v7"))
   con$addTag("inputport", attrs=c(name="workdir"), ".none")
@@ -704,7 +706,7 @@ for(iter in 1:lusimRepetition){
   ## Section 5: CREATE CHANGES MAP ####
   ##########################################################
   
-``
+  lusimInitialLCFile <- lusimFinalLCFile
   lusimFinalLCFile <- paste0(lusimSimulationStep, '/Landscape0001.tif')
   
   lusimLanduse1 <- raster(lusimInitialLCFile)
@@ -723,7 +725,9 @@ for(iter in 1:lusimRepetition){
   }
   lusimChangesDatabase$value_temp <- NULL
   colnames(lusimChangesDatabase) = c('ID_CHG', 'COUNT', 'ID_LC1', 'ID_LC2')
-  writeRaster(lusimChangeMap, paste0(lusimSimulationStep, '/changeMap_', ggInitialYear + ggTimeStep, '_', ggFinalYear + ggTimeStep, '.tif'))
+  lusimInitialYear <- ggInitialYear + ggTimeStep
+  lusimFinalYear <- ggFinalYear + ggTimeStep
+  writeRaster(lusimChangeMap, paste0(lusimSimulationStep, '/changeMap_', lusimInitialYear, '_', lusimFinalYear, '.tif'), overwrite=T, format="GTiff")
   
   ## Section 6: CREATE DISTANCE MAP(S) ####
   ##########################################################
@@ -733,90 +737,66 @@ for(iter in 1:lusimRepetition){
   file.copy(lusimListFactors, lusimSimulationStepFactorsFolder)
   
   # generate specific distance map(s)
-  # !24 -> 24 d_conv_infrastructure
   # reclassify
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_conv_infrastructure <- ifelse(ID_LC1 != 24 & ID_LC2 == 24, 1, NA) })
-  lusimDistanceToInfrastructure <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_conv_infrastructure")])
-  lusimDistanceToInfrastructureFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_conv_infrastructure.tif')
+  # !8 -> 8 dis_aca
+  lusimChangesDatabase <- within(lusimChangesDatabase, { dis_aca <- ifelse(ID_LC1 != 8 & ID_LC2 == 8, 1, NA) })
+  lusimDistanceToAcacia <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_aca")])
+  lusimDistanceToAcaciaFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_aca.tif')
   # create distance
-  lusimDistanceToInfrastructureTemp <- proximity(lusimDistanceToInfrastructure, values = 1, in_meters = TRUE)
+  lusimDistanceToAcaciaTemp <- proximity(lusimDistanceToAcacia, values = 1, in_meters = TRUE)
   # extract by mask
-  lusimDistanceToInfrastructureTemp <- spatial_sync_raster(lusimDistanceToInfrastructureTemp, ggZone, method="ngb")
-  lusimDistanceToInfrastructureTemp <- lusimDistanceToInfrastructureTemp * lusimMaskData
-  writeRaster(lusimDistanceToInfrastructureTemp, lusimDistanceToInfrastructureFile, format="GTiff", overwrite=T) 
-  rm(lusimDistanceToInfrastructure, lusimDistanceToInfrastructureTemp)
+  lusimDistanceToAcaciaTemp <- spatial_sync_raster(lusimDistanceToAcaciaTemp, lusimZone, method="ngb")
+  lusimDistanceToAcaciaTemp <- lusimDistanceToAcaciaTemp * lusimMaskData
+  writeRaster(lusimDistanceToAcaciaTemp, lusimDistanceToAcaciaFile, format="GTiff", overwrite=T)  
+  rm(lusimDistanceToAcacia, lusimDistanceToAcaciaTemp)
   
-  # !8 -> 8 d_conv_pulp
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_conv_pulp <- ifelse(ID_LC1 != 8 & ID_LC2 == 8, 1, NA) })
-  lusimDistanceToPulp <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_conv_pulp")])
-  lusimDistanceToPulpFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_conv_pulp.tif')
-  # create distance
-  lusimDistanceToPulpTemp <- proximity(lusimDistanceToPulp, values = 1, in_meters = TRUE)
-  # extract by mask
-  lusimDistanceToPulpTemp <- spatial_sync_raster(lusimDistanceToPulpTemp, ggZone, method="ngb")
-  lusimDistanceToPulpTemp <- lusimDistanceToPulpTemp * lusimMaskData
-  writeRaster(lusimDistanceToPulpTemp, lusimDistanceToPulpFile, format="GTiff", overwrite=T)  
-  rm(lusimDistanceToPulp, lusimDistanceToPulpTemp)
-  
-  # !11,!12 -> 11, 12 d_conv_rubber
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_conv_rubber <- ifelse((ID_LC1 !=  11 & ID_LC2 == 11) | (ID_LC1 !=  12 & ID_LC2 == 12), 1, NA) })
-  lusimDistanceToRubber <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_conv_rubber")])
-  lusimDistanceToRubberFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_conv_rubber.tif')
+  # !9 -> 9 dis_rub
+  lusimChangesDatabase <- within(lusimChangesDatabase, { dis_rub <- ifelse(ID_LC1 !=  9 & ID_LC2 == 9, 1, NA) })
+  lusimDistanceToRubber <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_rub")])
+  lusimDistanceToRubberFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_rub.tif')
   # create distance
   lusimDistanceToRubberTemp <- proximity(lusimDistanceToRubber, values = 1, in_meters = TRUE)
   # extract by mask
-  lusimDistanceToRubberTemp <- spatial_sync_raster(lusimDistanceToRubberTemp, ggZone, method="ngb")
+  lusimDistanceToRubberTemp <- spatial_sync_raster(lusimDistanceToRubberTemp, lusimZone, method="ngb")
   lusimDistanceToRubberTemp <- lusimDistanceToRubberTemp * lusimMaskData
   writeRaster(lusimDistanceToRubberTemp, lusimDistanceToRubberFile, format="GTiff", overwrite=T)  
   rm(lusimDistanceToRubber, lusimDistanceToRubberTemp)
   
-  # !10 -> 10 d_conv_coffee
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_conv_coffee <- ifelse(ID_LC1 != 10 & ID_LC2 == 10, 1, NA) })
-  lusimDistanceToCoffee <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_conv_coffee")])
-  lusimDistanceToCoffeeFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_conv_coffee.tif')
-  # create distance
-  lusimDistanceToCoffeeTemp <- proximity(lusimDistanceToCoffee, values = 1, in_meters = TRUE)
-  # extract by mask
-  lusimDistanceToCoffeeTemp <- spatial_sync_raster(lusimDistanceToCoffeeTemp, ggZone, method="ngb")
-  lusimDistanceToCoffeeTemp <- lusimDistanceToCoffeeTemp * lusimMaskData
-  writeRaster(lusimDistanceToCoffeeTemp, lusimDistanceToCoffeeFile, format="GTiff", overwrite=T)  
-  rm(lusimDistanceToCoffee, lusimDistanceToCoffeeTemp)
-  
-  # !13 -> 13 d_conv_oilpalm
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_conv_oilpalm <- ifelse(ID_LC1 != 13 & ID_LC2 == 13, 1, NA) })
-  lusimDistanceToOilPalm <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_conv_oilpalm")])
-  lusimDistanceToOilPalmFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_conv_oilpalm.tif')
+  # !10 -> 10 dis_op
+  lusimChangesDatabase <- within(lusimChangesDatabase, { dis_op <- ifelse(ID_LC1 != 10 & ID_LC2 == 10, 1, NA) })
+  lusimDistanceToOilPalm <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_op")])
+  lusimDistanceToOilPalmFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_op.tif')
   # create distance
   lusimDistanceToOilPalmTemp <- proximity(lusimDistanceToOilPalm, values = 1, in_meters = TRUE)
   # extract by mask
-  lusimDistanceToOilPalmTemp <- spatial_sync_raster(lusimDistanceToOilPalmTemp, ggZone, method="ngb")
+  lusimDistanceToOilPalmTemp <- spatial_sync_raster(lusimDistanceToOilPalmTemp, lusimZone, method="ngb")
   lusimDistanceToOilPalmTemp <- lusimDistanceToOilPalmTemp * lusimMaskData
   writeRaster(lusimDistanceToOilPalmTemp, lusimDistanceToOilPalmFile, format="GTiff", overwrite=T)  
   rm(lusimDistanceToOilPalm, lusimDistanceToOilPalmTemp)
   
-  # !19 -> 19 d_conv_rice
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_conv_rice <- ifelse(ID_LC1 != 19 & ID_LC2 == 19, 1, NA) })
-  lusimDistanceToRice <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_conv_rice")])
-  lusimDistanceToRiceFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_conv_rice.tif') 
-  # create distance
-  lusimDistanceToRiceTemp <- proximity(lusimDistanceToRice, values = 1, in_meters = TRUE)
-  # extract by mask
-  lusimDistanceToRiceTemp <- spatial_sync_raster(lusimDistanceToRiceTemp, ggZone, method="ngb")
-  lusimDistanceToRiceTemp <- lusimDistanceToRiceTemp * lusimMaskData
-  writeRaster(lusimDistanceToRiceTemp, lusimDistanceToRiceFile, format="GTiff", overwrite=T)  
-  rm(lusimDistanceToRice, lusimDistanceToRiceTemp)
-  
-  # !1-7 -> 1-7 d_defor
-  lusimChangesDatabase <- within(lusimChangesDatabase, { d_defor <- ifelse(!ID_LC2 %in% c(1:7) & ID_LC1 %in% c(1:7), 1, NA) })
-  lusimDistanceToDeforestation <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "d_defor")])
-  lusimDistanceToDeforestationFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_d_defor.tif')
+  # !1-6 -> 1-6 dis_def
+  lusimChangesDatabase <- within(lusimChangesDatabase, { dis_def <- ifelse(!ID_LC2 %in% c(1:6) & ID_LC1 %in% c(1:6), 1, NA) })
+  lusimDistanceToDeforestation <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_def")])
+  lusimDistanceToDeforestationFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_def.tif')
   # create distance
   lusimDistanceToDeforestationTemp <- proximity(lusimDistanceToDeforestation, values = 1, in_meters = TRUE)
   # extract by mask
-  lusimDistanceToDeforestationTemp <- spatial_sync_raster(lusimDistanceToDeforestationTemp, ggZone, method="ngb")
+  lusimDistanceToDeforestationTemp <- spatial_sync_raster(lusimDistanceToDeforestationTemp, lusimZone, method="ngb")
   lusimDistanceToDeforestationTemp <- lusimDistanceToDeforestationTemp * lusimMaskData
   writeRaster(lusimDistanceToDeforestationTemp, lusimDistanceToDeforestationFile, format="GTiff", overwrite=T)  
   rm(lusimDistanceToDeforestation, lusimDistanceToDeforestationTemp)
+  
+  # 1-2, 3-4, 5-6 dis_deg
+  lusimChangesDatabase <- within(lusimChangesDatabase, { dis_deg <- ifelse((ID_LC1 ==  1 & ID_LC2 == 2) | (ID_LC1 ==  3 & ID_LC2 == 4) | (ID_LC1 ==  5 & ID_LC2 == 6), 1, NA) })
+  lusimDistanceToDegradation <- reclassify(lusimChangeMap, lusimChangesDatabase[, c("ID_CHG", "dis_deg")])
+  lusimDistanceToDegradationFile <- paste0(lusimSimulationStepFactorsFolder, '/factor_dis_deg.tif')
+  # create distance
+  lusimDistanceToDegradationTemp <- proximity(lusimDistanceToDegradation, values = 1, in_meters = TRUE)
+  # extract by mask
+  lusimDistanceToDegradationTemp <- spatial_sync_raster(lusimDistanceToDegradationTemp, lusimZone, method="ngb")
+  lusimDistanceToDegradationTemp <- lusimDistanceToDegradationTemp * lusimMaskData
+  writeRaster(lusimDistanceToDegradationTemp, lusimDistanceToDegradationFile, format="GTiff", overwrite=T)  
+  rm(lusimDistanceToDegradation, lusimDistanceToDegradationTemp)
   
   
   # Section 7: RASTER CUBE ####
